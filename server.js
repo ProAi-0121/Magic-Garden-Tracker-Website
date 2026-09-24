@@ -498,7 +498,7 @@ async function checkNotifications() {
       const matched = s.weathers.find((w) => w === cur.name || w === cur.weatherId);
       if (matched) {
         const wm = ITEM_META.weathers[cur.name] || {};
-        const embed = baseEmbed(`${cur.name} weather started!`, 0x74b9ff, [
+        const embed = baseEmbed(`\`\`\`${cur.name} weather started!\`\`\``, 0x74b9ff, [
           `**${cur.name}** is active right now.`,
           ``,
           `Ends ${relTime(cur.endsAt)}.`,
@@ -525,7 +525,7 @@ async function checkNotifications() {
         if (entry.coinPrice != null) {
           lines.push(`Price: **${entry.coinPrice.toLocaleString()}** coins`);
         }
-        const embed = baseEmbed(`🛒 ${meta.name || itemId} in stock!`, 0x2ecc71, lines);
+        const embed = baseEmbed(`\`\`\`🛒 ${meta.name || itemId} in stock!\`\`\``, 0x2ecc71, lines);
         if (meta.image) embed.thumbnail = { url: meta.image };
         sendDm(uid, { embeds: [embed] });
       }

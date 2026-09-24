@@ -908,6 +908,78 @@
       "coinPrice": null,
       "image": "https://media.magicgarden.wiki/Cattail_Seed.png",
       "via": "dynamic"
+    },
+    "RainWardShard": {
+      "itemId": "RainWardShard",
+      "name": "Rain Ward Shard",
+      "shop": "rain",
+      "itemType": "Tool",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Rain_Shard.png",
+      "via": "dynamic"
+    },
+    "Clover": {
+      "itemId": "Clover",
+      "name": "Clover Seed",
+      "shop": "rain",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Clover_Seed.png",
+      "via": "dynamic"
+    },
+    "MarbleFountain": {
+      "itemId": "MarbleFountain",
+      "name": "Marble Fountain",
+      "shop": "rain",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Marble_Fountain.png",
+      "via": "dynamic"
+    },
+    "StoneBirdbath": {
+      "itemId": "StoneBirdbath",
+      "name": "Stone Birdbath",
+      "shop": "rain",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Stone_Birdbath.png",
+      "via": "dynamic"
+    },
+    "Mushroom": {
+      "itemId": "Mushroom",
+      "name": "Mushroom Spore",
+      "shop": "rain",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Mushroom_Spore.png",
+      "via": "dynamic"
+    },
+    "WoodFrog": {
+      "itemId": "WoodFrog",
+      "name": "Wood Frog",
+      "shop": "rain",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Wood_Frog.png",
+      "via": "dynamic"
+    },
+    "VioletCort": {
+      "itemId": "VioletCort",
+      "name": "Violet Cort Spore",
+      "shop": "rain",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Violet_Cort_Spore.png",
+      "via": "dynamic"
+    },
+    "Delphinium": {
+      "itemId": "Delphinium",
+      "name": "Delphinium Seed",
+      "shop": "rain",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Delphinium_Seed.png",
+      "via": "dynamic"
     }
   },
   "weathers": {
