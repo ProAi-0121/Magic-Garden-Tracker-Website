@@ -980,6 +980,195 @@
       "coinPrice": null,
       "image": "https://media.magicgarden.wiki/Delphinium_Seed.png",
       "via": "dynamic"
+    },
+    "Daisy": {
+      "itemId": "Daisy",
+      "name": "Daisy Seed",
+      "shop": "dawn",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Daisy_Seed.png",
+      "via": "dynamic"
+    },
+    "Eggplant": {
+      "itemId": "Eggplant",
+      "name": "Eggplant Seed",
+      "shop": "dawn",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Eggplant_Seed.png",
+      "via": "dynamic"
+    },
+    "Lavender": {
+      "itemId": "Lavender",
+      "name": "Lavender Seed",
+      "shop": "dawn",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Lavender_Seed.png",
+      "via": "dynamic"
+    },
+    "DawnEgg": {
+      "itemId": "DawnEgg",
+      "name": "Dawn Egg",
+      "shop": "dawn",
+      "itemType": "Egg",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Dawn_Egg.png",
+      "via": "dynamic"
+    },
+    "Saffron": {
+      "itemId": "Saffron",
+      "name": "Saffron Seed",
+      "shop": "dawn",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Saffron_Seed.png",
+      "via": "dynamic"
+    },
+    "Dawnbreaker": {
+      "itemId": "Dawnbreaker",
+      "name": "Dawnbreaker Spore",
+      "shop": "dawn",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Dawnbreaker_Spore.png",
+      "via": "dynamic"
+    },
+    "DawnCelestial": {
+      "itemId": "DawnCelestial",
+      "name": "Dawnbinder Pod",
+      "shop": "dawn",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Dawnbinder_Pod.png",
+      "via": "dynamic"
+    },
+    "Ube": {
+      "itemId": "Ube",
+      "name": "Ube Seed",
+      "shop": "dawn",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Ube_Seed.png",
+      "via": "dynamic"
+    },
+    "ChilledPotion": {
+      "itemId": "ChilledPotion",
+      "name": "Chilled Potion",
+      "shop": "snow",
+      "itemType": "Tool",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Chilled_Potion.png",
+      "via": "dynamic"
+    },
+    "SnowWardShard": {
+      "itemId": "SnowWardShard",
+      "name": "Snow Ward Shard",
+      "shop": "snow",
+      "itemType": "Tool",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Snow_Shard.png",
+      "via": "dynamic"
+    },
+    "FrozenPotion": {
+      "itemId": "FrozenPotion",
+      "name": "Frozen Potion",
+      "shop": "snow",
+      "itemType": "Tool",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Frozen_Potion.png",
+      "via": "dynamic"
+    },
+    "Snowdrop": {
+      "itemId": "Snowdrop",
+      "name": "Snowdrop Seed",
+      "shop": "snow",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Snowdrop_Seed.png",
+      "via": "dynamic"
+    },
+    "PineTree": {
+      "itemId": "PineTree",
+      "name": "Pinecone",
+      "shop": "snow",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Pinecone.png",
+      "via": "dynamic"
+    },
+    "ColoredStringLights": {
+      "itemId": "ColoredStringLights",
+      "name": "Colored String Lights",
+      "shop": "snow",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Colored_String_Lights.png",
+      "via": "dynamic"
+    },
+    "Poinsettia": {
+      "itemId": "Poinsettia",
+      "name": "Poinsettia Seed",
+      "shop": "snow",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Poinsettia_Seed.png",
+      "via": "dynamic"
+    },
+    "WoodCaribou": {
+      "itemId": "WoodCaribou",
+      "name": "Wood Caribou",
+      "shop": "snow",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Wood_Caribou.png",
+      "via": "dynamic"
+    },
+    "Leek": {
+      "itemId": "Leek",
+      "name": "Leek Seed",
+      "shop": "snow",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Leek_Seed.png",
+      "via": "dynamic"
+    },
+    "MarbleCaribou": {
+      "itemId": "MarbleCaribou",
+      "name": "Marble Caribou",
+      "shop": "snow",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Marble_Caribou.png",
+      "via": "dynamic"
+    },
+    "StoneCaribou": {
+      "itemId": "StoneCaribou",
+      "name": "Stone Caribou",
+      "shop": "snow",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Stone_Caribou.png",
+      "via": "dynamic"
+    },
+    "SnowEgg": {
+      "itemId": "SnowEgg",
+      "name": "Snow Egg",
+      "shop": "snow",
+      "itemType": "Egg",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Snow_Egg.png",
+      "via": "dynamic"
+    },
+    "Squash": {
+      "itemId": "Squash",
+      "name": "Squash Seed",
+      "shop": "snow",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Squash_Seed.png",
+      "via": "dynamic"
     }
   },
   "weathers": {
