@@ -51,8 +51,10 @@ Copy `config.example.json` to `config.json` and fill in three things from the
    page, add `http://192.168.1.69:8000/callback` under Redirects.
 2. **bot_token** — Bot page → Reset Token. Paste it in and save — the server
    picks it up without a restart and the bot goes 🟢 online.
-3. **Join the server** — the bot can only DM people it shares a server with,
-   so members need to join: https://discord.gg/WzzkZS8CkB
+3. **Join the server** — at login the site now asks for permission to add you
+   to our server automatically, so most people won't have to do anything.
+   If the auto-join can't happen (or you declined), the Alerts page shows a
+   join button: https://discord.gg/WzzkZS8CkB
    (Self-hosting for your own crew? The Alerts page also has a normal bot
    invite link.)
 
@@ -66,6 +68,10 @@ goes from 0 stock to in stock, or a new weather window starts — everyone who
 belled that item/weather gets a DM with the details. That's why it never
 spams: it only messages on transitions, and it remembers where it left off
 across restarts.
+
+If several of your items restock at once you get **one** DM, with the
+priciest item first and a `> Name - stock` list on top — the mention pings
+you on that first message. Each item gets its own embed with its picture.
 
 ## Files that matter
 
