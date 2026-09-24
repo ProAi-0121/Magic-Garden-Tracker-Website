@@ -138,6 +138,42 @@ async function fetchGameApi(endpoint) {
   return res.json();
 }
 
+// does this weather object actually say anything?
+function weatherHasData(w) {
+  return Boolean(
+    w && (w.current || (Array.isArray(w.upcoming) && w.upcoming.length > 0))
+  );
+}
+
+// The game's /weather endpoint sometimes returns a bare `null` (or the shops
+// response momentarily omits its embedded weather) even while a storm is
+// active - which used to flip the site to "Clear skies". So: pick whichever
+// source has data, and if BOTH come back empty, keep serving the last known
+// weather until its window has actually passed.
+let lastGoodWeather = null; // { weather, at }
+
+function pickWeather(weather, shopsWeather) {
+  const candidates = [weather, shopsWeather].filter(weatherHasData);
+  if (candidates.length > 0) {
+    // prefer the one with a live current window, else the most upcoming info
+    return (
+      candidates.find((w) => w.current) ||
+      candidates.sort((a, b) => (b.upcoming || []).length - (a.upcoming || []).length)[0]
+    );
+  }
+  // both empty -> reuse the last known weather while it's still meaningful
+  if (lastGoodWeather) {
+    const lw = lastGoodWeather.weather;
+    const now = Date.now();
+    const cur = lw.current && new Date(lw.current.endsAt).getTime() > now ? lw.current : null;
+    const upcoming = (lw.upcoming || []).filter((u) => new Date(u.endsAt).getTime() > now);
+    if (cur || upcoming.length > 0) {
+      return { current: cur, upcoming };
+    }
+  }
+  return null;
+}
+
 async function getGameData(force = false) {
   if (!force && apiCache.data && Date.now() - apiCache.at < CACHE_MS) {
     return apiCache.data;
@@ -147,11 +183,15 @@ async function getGameData(force = false) {
   try {
     weather = await fetchGameApi("weather");
   } catch {
-    weather = shops.weather || null; // shops response embeds weather too
+    weather = null; // shops.weather is the fallback
+  }
+  const bestWeather = pickWeather(weather, shops.weather);
+  if (weatherHasData(bestWeather)) {
+    lastGoodWeather = { weather: bestWeather, at: Date.now() };
   }
   const data = {
     shops: shops.shops || {},
-    weather: weather || shops.weather || { current: null, upcoming: [] },
+    weather: bestWeather || { current: null, upcoming: [] },
     serverTime: new Date().toISOString(),
   };
   apiCache = { at: Date.now(), data };
@@ -787,7 +827,8 @@ const RATE_LIMITS = {
   ip: 120, // per IP per minute
   api: 40, // per IP on /api/* data endpoints
   auth: 6, // per IP on /login + /callback (OAuth is expensive + Discord-side)
-  dm: 3, // per user per 5 min on /api/test-dm
+  dm: 1, // test DMs: 1 per user per DM_COOLDOWN
+  dmWindowMs: 10 * 60_000, // 10 minutes between test DMs
 };
 
 const rateState = {
@@ -991,10 +1032,12 @@ const server = http.createServer(async (req, res) => {
       if (!config.bot_token) {
         return sendJson(res, 400, { error: "no bot token configured in website/config.json" });
       }
-      // 3 per 5 minutes per user - stops people burning our Discord rate
-      // limits (or our bot token) by hammering this button
-      if (hitRate(user.id, rateState.dm, RATE_LIMITS.dm, 5 * 60_000)) {
-        return sendJson(res, 429, { error: "test DM cooldown - wait a few minutes" });
+      // 1 per 10 minutes per user - the real notifications come from the
+      // poller anyway; this is just a "does it work" button
+      if (hitRate(user.id, rateState.dm, RATE_LIMITS.dm, RATE_LIMITS.dmWindowMs)) {
+        return sendJson(res, 429, {
+          error: "test DM cooldown - you can send one every 10 minutes",
+        });
       }
       const ok = await sendDm(user.id, {
         embeds: [
