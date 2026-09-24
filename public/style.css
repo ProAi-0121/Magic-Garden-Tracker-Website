@@ -1,25 +1,25 @@
 /* Magic Garden Tracker - cozy garden theme (light + dark) */
 :root {
-  --green-900: #1d4a2a;
-  --green-700: #2f7a3d;
-  --green-500: #4caf50;
-  --green-300: #a5d6a7;
+  --green-900: #4a1e1d;
+  --green-700: #7a2f2f;
+  --green-500: #af4c4c;
+  --green-300: #d6a5a5;
   --paper: #fffdf6;
   --paper-2: #f6efdd;
   --border: #eadfc6;
   --border-soft: #e2d8c2;
-  --text: #33413a;
-  --muted: #7d8a80;
-  --heading: #1d4a2a;
-  --chip-bg: #f4faf1;
-  --chip-border: #d8ecd2;
+  --text: #413333;
+  --muted: #8a7d7d;
+  --heading: #4a1d1d;
+  --chip-bg: #faf1f1;
+  --chip-border: #ecd2d2;
   --input-bg: #ffffff;
   --danger: #e57373;
   --sun: #ffd54f;
   --wood: #8d6e63;
   --radius: 16px;
-  --shadow: 0 4px 14px rgba(52, 88, 60, 0.14);
-  --shadow-lg: 0 10px 30px rgba(52, 88, 60, 0.18);
+  --shadow: 0 4px 14px rgba(88, 52, 52, 0.14);
+  --shadow-lg: 0 10px 30px rgba(88, 53, 52, 0.18);
   --body-bg:
     radial-gradient(1200px 500px at 80% -10%, rgba(174, 226, 255, 0.55), transparent 60%),
     radial-gradient(900px 420px at 10% -5%, rgba(255, 213, 79, 0.35), transparent 55%),
@@ -27,27 +27,27 @@
 }
 
 body.dark {
-  --green-900: #b9e6c3;
-  --green-700: #7cc98a;
-  --green-500: #55b95c;
-  --green-300: #35543d;
-  --paper: #17211c;
-  --paper-2: #1d2a22;
-  --border: #2a3a30;
-  --border-soft: #263629;
-  --text: #dfe9e1;
-  --muted: #8fa598;
-  --heading: #c9f2d2;
-  --chip-bg: #1d2b23;
-  --chip-border: #2f4636;
-  --input-bg: #101915;
+  --green-900: #e6b9b9;
+  --green-700: #c9867c;
+  --green-500: #b95555;
+  --green-300: #543835;
+  --paper: #211717;
+  --paper-2: #2a1d1d;
+  --border: #3a2a2a;
+  --border-soft: #362626;
+  --text: #e9dfdf;
+  --muted: #a58f8f;
+  --heading: #f2c9c9;
+  --chip-bg: #2b1d1d;
+  --chip-border: #462f2f;
+  --input-bg: #191010;
   --sun: #ffca28;
   --shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.45);
   --body-bg:
     radial-gradient(1200px 500px at 80% -10%, rgba(64, 120, 170, 0.18), transparent 60%),
     radial-gradient(900px 420px at 10% -5%, rgba(255, 193, 7, 0.08), transparent 55%),
-    linear-gradient(180deg, #0d1512 0%, #101a14 340px, #0c130f 100%);
+    linear-gradient(180deg, #150d0d 0%, #1a1010 340px, #130c0c 100%);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
