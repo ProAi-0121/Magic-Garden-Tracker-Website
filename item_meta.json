@@ -1,0 +1,945 @@
+{
+  "items": {
+    "Carrot": {
+      "itemId": "Carrot",
+      "name": "Carrot Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 10,
+      "image": "https://media.magicgarden.wiki/Carrot.png",
+      "via": "override"
+    },
+    "Cabbage": {
+      "itemId": "Cabbage",
+      "name": "Cabbage Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 30,
+      "image": "https://media.magicgarden.wiki/Cabbage.png",
+      "via": "override"
+    },
+    "Strawberry": {
+      "itemId": "Strawberry",
+      "name": "Strawberry Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 50,
+      "image": "https://media.magicgarden.wiki/Strawberry.png",
+      "via": "override"
+    },
+    "Aloe": {
+      "itemId": "Aloe",
+      "name": "Aloe Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 135,
+      "image": "https://media.magicgarden.wiki/Aloe.png",
+      "via": "override"
+    },
+    "Beet": {
+      "itemId": "Beet",
+      "name": "Beet Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 210,
+      "image": "https://media.magicgarden.wiki/Beet.png",
+      "via": "override"
+    },
+    "FavaBean": {
+      "itemId": "FavaBean",
+      "name": "Fava Bean",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 250,
+      "image": "https://media.magicgarden.wiki/Fava_Bean_Pod.png",
+      "via": "override"
+    },
+    "Blueberry": {
+      "itemId": "Blueberry",
+      "name": "Blueberry Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 400,
+      "image": "https://media.magicgarden.wiki/Blueberry.png",
+      "via": "override"
+    },
+    "Apple": {
+      "itemId": "Apple",
+      "name": "Apple Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 500,
+      "image": "https://media.magicgarden.wiki/Apple.png",
+      "via": "override"
+    },
+    "OrangeTulip": {
+      "itemId": "OrangeTulip",
+      "name": "Tulip Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 600,
+      "image": "https://media.magicgarden.wiki/Tulip.png",
+      "via": "override"
+    },
+    "Tomato": {
+      "itemId": "Tomato",
+      "name": "Tomato Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 800,
+      "image": "https://media.magicgarden.wiki/Tomato.png",
+      "via": "override"
+    },
+    "Daffodil": {
+      "itemId": "Daffodil",
+      "name": "Daffodil Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 1000,
+      "image": "https://media.magicgarden.wiki/Daffodil.png",
+      "via": "override"
+    },
+    "Corn": {
+      "itemId": "Corn",
+      "name": "Corn Kernel",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 1300,
+      "image": "https://media.magicgarden.wiki/Corn.png",
+      "via": "override"
+    },
+    "Watermelon": {
+      "itemId": "Watermelon",
+      "name": "Watermelon Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 2500,
+      "image": "https://media.magicgarden.wiki/Watermelon.png",
+      "via": "override"
+    },
+    "Echeveria": {
+      "itemId": "Echeveria",
+      "name": "Echeveria Cutting",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 2500,
+      "image": "https://media.magicgarden.wiki/Echeveria.png",
+      "via": "override"
+    },
+    "Pumpkin": {
+      "itemId": "Pumpkin",
+      "name": "Pumpkin Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 3000,
+      "image": "https://media.magicgarden.wiki/Pumpkin.png",
+      "via": "override"
+    },
+    "Pear": {
+      "itemId": "Pear",
+      "name": "Pear Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 6000,
+      "image": "https://media.magicgarden.wiki/Pear.png",
+      "via": "override"
+    },
+    "Gentian": {
+      "itemId": "Gentian",
+      "name": "Gentian Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 9000,
+      "image": "https://media.magicgarden.wiki/Gentian.png",
+      "via": "override"
+    },
+    "Coconut": {
+      "itemId": "Coconut",
+      "name": "Coconut Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 10000,
+      "image": "https://media.magicgarden.wiki/Coconut.png",
+      "via": "override"
+    },
+    "Banana": {
+      "itemId": "Banana",
+      "name": "Banana Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 15000,
+      "image": "https://media.magicgarden.wiki/Banana.png",
+      "via": "override"
+    },
+    "Lily": {
+      "itemId": "Lily",
+      "name": "Lily Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 20000,
+      "image": "https://media.magicgarden.wiki/Lily.png",
+      "via": "override"
+    },
+    "Camellia": {
+      "itemId": "Camellia",
+      "name": "Camellia Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 55000,
+      "image": "https://media.magicgarden.wiki/Camellia.png",
+      "via": "override"
+    },
+    "Peach": {
+      "itemId": "Peach",
+      "name": "Peach Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 85000,
+      "image": "https://media.magicgarden.wiki/Peach.png",
+      "via": "override"
+    },
+    "BurrosTail": {
+      "itemId": "BurrosTail",
+      "name": "Burro's Tail Cutting",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 93000,
+      "image": "https://media.magicgarden.wiki/Burro%27s_Tail.png",
+      "via": "override"
+    },
+    "Cactus": {
+      "itemId": "Cactus",
+      "name": "Cactus Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 200000,
+      "image": "https://media.magicgarden.wiki/Cactus.png",
+      "via": "override"
+    },
+    "Bamboo": {
+      "itemId": "Bamboo",
+      "name": "Bamboo Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 400000,
+      "image": "https://media.magicgarden.wiki/Bamboo.png",
+      "via": "override"
+    },
+    "Chrysanthemum": {
+      "itemId": "Chrysanthemum",
+      "name": "Chrysanthemum Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 670000,
+      "image": "https://media.magicgarden.wiki/Chrysanthemum.png",
+      "via": "override"
+    },
+    "Grape": {
+      "itemId": "Grape",
+      "name": "Grape Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 850000,
+      "image": "https://media.magicgarden.wiki/Grape.png",
+      "via": "override"
+    },
+    "Pepper": {
+      "itemId": "Pepper",
+      "name": "Pepper Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 1000000,
+      "image": "https://media.magicgarden.wiki/Pepper.png",
+      "via": "override"
+    },
+    "Lemon": {
+      "itemId": "Lemon",
+      "name": "Lemon Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 2000000,
+      "image": "https://media.magicgarden.wiki/Lemon.png",
+      "via": "override"
+    },
+    "PassionFruit": {
+      "itemId": "PassionFruit",
+      "name": "Passion Fruit Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 2750000,
+      "image": "https://media.magicgarden.wiki/Passion_Fruit.png",
+      "via": "override"
+    },
+    "DragonFruit": {
+      "itemId": "DragonFruit",
+      "name": "Dragon Fruit Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 5000000,
+      "image": "https://media.magicgarden.wiki/Dragon_Fruit.png",
+      "via": "override"
+    },
+    "Cacao": {
+      "itemId": "Cacao",
+      "name": "Cacao Bean",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 10000000,
+      "image": "https://media.magicgarden.wiki/Cacao_Fruit.png",
+      "via": "override"
+    },
+    "Lychee": {
+      "itemId": "Lychee",
+      "name": "Lychee Pit",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 25000000,
+      "image": "https://media.magicgarden.wiki/Lychee.png",
+      "via": "override"
+    },
+    "Sunflower": {
+      "itemId": "Sunflower",
+      "name": "Sunflower Seed",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 100000000,
+      "image": "https://media.magicgarden.wiki/Sunflower.png",
+      "via": "override"
+    },
+    "Starweaver": {
+      "itemId": "Starweaver",
+      "name": "Starweaver Pod",
+      "shop": "seed",
+      "itemType": "Seed",
+      "coinPrice": 1000000000,
+      "image": "https://media.magicgarden.wiki/Starweaver_Fruit.png",
+      "via": "override"
+    },
+    "CommonEgg": {
+      "itemId": "CommonEgg",
+      "name": "Common Egg",
+      "shop": "egg",
+      "itemType": "Egg",
+      "coinPrice": 100000,
+      "image": "https://media.magicgarden.wiki/Common_Egg.png",
+      "via": "Common Egg"
+    },
+    "UncommonEgg": {
+      "itemId": "UncommonEgg",
+      "name": "Uncommon Egg",
+      "shop": "egg",
+      "itemType": "Egg",
+      "coinPrice": 1000000,
+      "image": "https://media.magicgarden.wiki/Uncommon_Egg.png",
+      "via": "Uncommon Egg"
+    },
+    "RareEgg": {
+      "itemId": "RareEgg",
+      "name": "Rare Egg",
+      "shop": "egg",
+      "itemType": "Egg",
+      "coinPrice": 10000000,
+      "image": "https://media.magicgarden.wiki/Rare_Egg.png",
+      "via": "Rare Egg"
+    },
+    "LegendaryEgg": {
+      "itemId": "LegendaryEgg",
+      "name": "Legendary Egg",
+      "shop": "egg",
+      "itemType": "Egg",
+      "coinPrice": 100000000,
+      "image": "https://media.magicgarden.wiki/Legendary_Egg.png",
+      "via": "Legendary Egg"
+    },
+    "MythicalEgg": {
+      "itemId": "MythicalEgg",
+      "name": "Mythical Egg",
+      "shop": "egg",
+      "itemType": "Egg",
+      "coinPrice": 1000000000,
+      "image": "https://media.magicgarden.wiki/Mythical_Egg.png",
+      "via": "Mythical Egg"
+    },
+    "WateringCan": {
+      "itemId": "WateringCan",
+      "name": "Watering Can",
+      "shop": "tool",
+      "itemType": "Tool",
+      "coinPrice": 5000,
+      "image": "https://media.magicgarden.wiki/Watering_Can.png",
+      "via": "override"
+    },
+    "PlanterPot": {
+      "itemId": "PlanterPot",
+      "name": "Planter Pot",
+      "shop": "tool",
+      "itemType": "Tool",
+      "coinPrice": 25000,
+      "image": "https://media.magicgarden.wiki/Planter_Pot.png",
+      "via": "override"
+    },
+    "CropCleanser": {
+      "itemId": "CropCleanser",
+      "name": "Crop Cleanser",
+      "shop": "tool",
+      "itemType": "Tool",
+      "coinPrice": 80000,
+      "image": "https://media.magicgarden.wiki/Crop_Cleanser.png",
+      "via": "override"
+    },
+    "Shovel": {
+      "itemId": "Shovel",
+      "name": "Garden Shovel",
+      "shop": "tool",
+      "itemType": "Tool",
+      "coinPrice": 1000000,
+      "image": "https://media.magicgarden.wiki/Shovel.png",
+      "via": "Shovel"
+    },
+    "ReplenishPotion": {
+      "itemId": "ReplenishPotion",
+      "name": "Hunger Potion",
+      "shop": "tool",
+      "itemType": "Tool",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Replenish_Potion.png",
+      "via": "override"
+    },
+    "XPPotion": {
+      "itemId": "XPPotion",
+      "name": "XP Potion",
+      "shop": "tool",
+      "itemType": "Tool",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/XP_Potion.png",
+      "via": "override"
+    },
+    "FeedingTrough": {
+      "itemId": "FeedingTrough",
+      "name": "Feeding Trough",
+      "shop": "tool",
+      "itemType": "Decor",
+      "coinPrice": 10000000,
+      "image": "https://media.magicgarden.wiki/Feeding_Trough.png",
+      "via": "override"
+    },
+    "DecorShed": {
+      "itemId": "DecorShed",
+      "name": "Decor Shed",
+      "shop": "tool",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Decor_Shed.png",
+      "via": "override"
+    },
+    "PetHutch": {
+      "itemId": "PetHutch",
+      "name": "Pet Hutch",
+      "shop": "tool",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Pet_Hutch.png",
+      "via": "override"
+    },
+    "SeedSilo": {
+      "itemId": "SeedSilo",
+      "name": "Seed Silo",
+      "shop": "tool",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Seed_Silo.png",
+      "via": "override"
+    },
+    "ToolShack": {
+      "itemId": "ToolShack",
+      "name": "Tool Shack",
+      "shop": "tool",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Tool_Shack.png",
+      "via": "override"
+    },
+    "SmallRock": {
+      "itemId": "SmallRock",
+      "name": "Small Garden Rock",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 1000,
+      "image": "https://media.magicgarden.wiki/Small_Garden_Rock.png",
+      "via": "Small Garden Rock"
+    },
+    "MediumRock": {
+      "itemId": "MediumRock",
+      "name": "Medium Garden Rock",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 2500,
+      "image": "https://media.magicgarden.wiki/Medium_Garden_Rock.png",
+      "via": "Medium Garden Rock"
+    },
+    "LargeRock": {
+      "itemId": "LargeRock",
+      "name": "Large Garden Rock",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 5000,
+      "image": "https://media.magicgarden.wiki/Large_Garden_Rock.png",
+      "via": "Large Garden Rock"
+    },
+    "HayBale": {
+      "itemId": "HayBale",
+      "name": "Hay Bale",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 6000,
+      "image": "https://media.magicgarden.wiki/Hay_Bale.png",
+      "via": "Hay Bale"
+    },
+    "StringLights": {
+      "itemId": "StringLights",
+      "name": "String Lights",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 7000,
+      "image": "https://media.magicgarden.wiki/String_Lights.png",
+      "via": "String Lights"
+    },
+    "WoodBench": {
+      "itemId": "WoodBench",
+      "name": "Wood Bench",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 10000,
+      "image": "https://media.magicgarden.wiki/Wood_Bench.png",
+      "via": "Wood Bench"
+    },
+    "WoodStoolShort": {
+      "itemId": "WoodStoolShort",
+      "name": "Short Wood Stool",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 8000,
+      "image": "https://media.magicgarden.wiki/Short_Wood_Stool.png",
+      "via": "Short Wood Stool"
+    },
+    "WoodStool": {
+      "itemId": "WoodStool",
+      "name": "Tall Wood Stool",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 12000,
+      "image": "https://media.magicgarden.wiki/Tall_Wood_Stool.png",
+      "via": "Tall Wood Stool"
+    },
+    "WoodArch": {
+      "itemId": "WoodArch",
+      "name": "Wood Arch",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 20000,
+      "image": "https://media.magicgarden.wiki/Wood_Arch.png",
+      "via": "Wood Arch"
+    },
+    "WoodPergola": {
+      "itemId": "WoodPergola",
+      "name": "Wood Pergola",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 30000,
+      "image": "https://media.magicgarden.wiki/Wood_Pergola.png",
+      "via": "Wood Pergola"
+    },
+    "WoodBridge": {
+      "itemId": "WoodBridge",
+      "name": "Wood Bridge",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 40000,
+      "image": "https://media.magicgarden.wiki/Wood_Bridge.png",
+      "via": "Wood Bridge"
+    },
+    "WoodLampPost": {
+      "itemId": "WoodLampPost",
+      "name": "Wood Lamp Post",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 80000,
+      "image": "https://media.magicgarden.wiki/Wood_Lamp_Post.png",
+      "via": "Wood Lamp Post"
+    },
+    "WoodOwl": {
+      "itemId": "WoodOwl",
+      "name": "Wood Owl",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 90000,
+      "image": "https://media.magicgarden.wiki/Wood_Owl.png",
+      "via": "Wood Owl"
+    },
+    "WoodBirdhouse": {
+      "itemId": "WoodBirdhouse",
+      "name": "Wood Birdhouse",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 100000,
+      "image": "https://media.magicgarden.wiki/Wood_Birdhouse.png",
+      "via": "Wood Birdhouse"
+    },
+    "WoodWindmill": {
+      "itemId": "WoodWindmill",
+      "name": "Wood Windmill",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 500000,
+      "image": "https://media.magicgarden.wiki/Wood_Windmill.png",
+      "via": "Wood Windmill"
+    },
+    "StoneBench": {
+      "itemId": "StoneBench",
+      "name": "Stone Bench",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 1000000,
+      "image": "https://media.magicgarden.wiki/Stone_Bench.png",
+      "via": "Stone Bench"
+    },
+    "StoneArch": {
+      "itemId": "StoneArch",
+      "name": "Stone Arch",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 4000000,
+      "image": "https://media.magicgarden.wiki/Stone_Arch.png",
+      "via": "Stone Arch"
+    },
+    "StoneBridge": {
+      "itemId": "StoneBridge",
+      "name": "Stone Bridge",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 5000000,
+      "image": "https://media.magicgarden.wiki/Stone_Bridge.png",
+      "via": "Stone Bridge"
+    },
+    "StoneLampPost": {
+      "itemId": "StoneLampPost",
+      "name": "Stone Lamp Post",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 8000000,
+      "image": "https://media.magicgarden.wiki/Stone_Lamp_Post.png",
+      "via": "Stone Lamp Post"
+    },
+    "StoneGnome": {
+      "itemId": "StoneGnome",
+      "name": "Stone Gnome",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 9000000,
+      "image": "https://media.magicgarden.wiki/Stone_Gnome.png",
+      "via": "Stone Gnome"
+    },
+    "StoneGnomess": {
+      "itemId": "StoneGnomess",
+      "name": "Stone Gnomess",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 9500000,
+      "image": "https://media.magicgarden.wiki/Stone_Gnomess.png",
+      "via": "Stone Gnomess"
+    },
+    "StonePedestal": {
+      "itemId": "StonePedestal",
+      "name": "Stone Pedestal",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 12000000,
+      "image": "https://media.magicgarden.wiki/Stone_Pedestal.png",
+      "via": "Stone Pedestal"
+    },
+    "MarbleBench": {
+      "itemId": "MarbleBench",
+      "name": "Marble Bench",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 75000000,
+      "image": "https://media.magicgarden.wiki/Marble_Bench.png",
+      "via": "Marble Bench"
+    },
+    "MarbleArch": {
+      "itemId": "MarbleArch",
+      "name": "Marble Arch",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 100000000,
+      "image": "https://media.magicgarden.wiki/Marble_Arch.png",
+      "via": "Marble Arch"
+    },
+    "MarbleBridge": {
+      "itemId": "MarbleBridge",
+      "name": "Marble Bridge",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 150000000,
+      "image": "https://media.magicgarden.wiki/Marble_Bridge.png",
+      "via": "Marble Bridge"
+    },
+    "MarblePedestal": {
+      "itemId": "MarblePedestal",
+      "name": "Marble Pedestal",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 180000000,
+      "image": "https://media.magicgarden.wiki/Marble_Pedestal.png",
+      "via": "Marble Pedestal"
+    },
+    "MarbleLampPost": {
+      "itemId": "MarbleLampPost",
+      "name": "Marble Lamp Post",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 200000000,
+      "image": "https://media.magicgarden.wiki/Marble_Lamp_Post.png",
+      "via": "Marble Lamp Post"
+    },
+    "MarbleBlobling": {
+      "itemId": "MarbleBlobling",
+      "name": "Marble Blobling",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 300000000,
+      "image": "https://media.magicgarden.wiki/Marble_Blobling.png",
+      "via": "Marble Blobling"
+    },
+    "MarbleKnight": {
+      "itemId": "MarbleKnight",
+      "name": "Marble Knight",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 400000000,
+      "image": "https://media.magicgarden.wiki/Marble_Knight.png",
+      "via": "Marble Knight"
+    },
+    "MiniFairyCottage": {
+      "itemId": "MiniFairyCottage",
+      "name": "Mini Fairy Cottage",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 500000000,
+      "image": "https://media.magicgarden.wiki/Mini_Fairy_Cottage.png",
+      "via": "Mini Fairy Cottage"
+    },
+    "StrawScarecrow": {
+      "itemId": "StrawScarecrow",
+      "name": "Straw Scarecrow",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 1000000000,
+      "image": "https://media.magicgarden.wiki/Straw_Scarecrow.png",
+      "via": "Straw Scarecrow"
+    },
+    "MiniFairyForge": {
+      "itemId": "MiniFairyForge",
+      "name": "Mini Fairy Forge",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 5000000000,
+      "image": "https://media.magicgarden.wiki/Mini_Fairy_Forge.png",
+      "via": "Mini Fairy Forge"
+    },
+    "MiniFairyKeep": {
+      "itemId": "MiniFairyKeep",
+      "name": "Mini Fairy Keep",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 25000000000,
+      "image": "https://media.magicgarden.wiki/Mini_Fairy_Keep.png",
+      "via": "Mini Fairy Keep"
+    },
+    "MiniWizardTower": {
+      "itemId": "MiniWizardTower",
+      "name": "Mini Wizard Tower",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 75000000000,
+      "image": "https://media.magicgarden.wiki/Mini_Wizard_Tower.png",
+      "via": "Mini Wizard Tower"
+    },
+    "MiniFairyCastle": {
+      "itemId": "MiniFairyCastle",
+      "name": "Mini Fairy Castle",
+      "shop": "decor",
+      "itemType": "Decor",
+      "coinPrice": 150000000000,
+      "image": "https://media.magicgarden.wiki/Mini_Fairy_Castle.png",
+      "via": "Mini Fairy Castle"
+    },
+    "ThunderWardShard": {
+      "itemId": "ThunderWardShard",
+      "name": "Thunder Ward Shard",
+      "shop": "thunder",
+      "itemType": "Tool",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Thunder_Shard.png",
+      "via": "dynamic"
+    },
+    "Cardoon": {
+      "itemId": "Cardoon",
+      "name": "Cardoon Seed",
+      "shop": "thunder",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Cardoon_Seed.png",
+      "via": "dynamic"
+    },
+    "ThunderEgg": {
+      "itemId": "ThunderEgg",
+      "name": "Thunder Egg",
+      "shop": "thunder",
+      "itemType": "Egg",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Thunder_Egg.png",
+      "via": "dynamic"
+    },
+    "PricklyPear": {
+      "itemId": "PricklyPear",
+      "name": "Prickly Pear Seed",
+      "shop": "thunder",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Prickly_Pear_Seed.png",
+      "via": "dynamic"
+    },
+    "LargeGravestone": {
+      "itemId": "LargeGravestone",
+      "name": "Large Gravestone",
+      "shop": "thunder",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Large_Gravestone.png",
+      "via": "dynamic"
+    },
+    "WindchimeStar": {
+      "itemId": "WindchimeStar",
+      "name": "Star Windchime",
+      "shop": "thunder",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Star_Windchime.png",
+      "via": "dynamic"
+    },
+    "Cauldron": {
+      "itemId": "Cauldron",
+      "name": "Cauldron",
+      "shop": "thunder",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Cauldron.png",
+      "via": "dynamic"
+    },
+    "ThunderCelestial": {
+      "itemId": "ThunderCelestial",
+      "name": "Thunderspire Pod",
+      "shop": "thunder",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Thunderspire_Pod.png",
+      "via": "dynamic"
+    },
+    "WindSpinner": {
+      "itemId": "WindSpinner",
+      "name": "Wind Spinner",
+      "shop": "thunder",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Wind_Spinner.png",
+      "via": "dynamic"
+    },
+    "MediumGravestone": {
+      "itemId": "MediumGravestone",
+      "name": "Medium Gravestone",
+      "shop": "thunder",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Medium_Gravestone.png",
+      "via": "dynamic"
+    },
+    "WindTurner": {
+      "itemId": "WindTurner",
+      "name": "Wind Turner",
+      "shop": "thunder",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Wind_Turner.png",
+      "via": "dynamic"
+    },
+    "WindchimeMoon": {
+      "itemId": "WindchimeMoon",
+      "name": "Moon Windchime",
+      "shop": "thunder",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Moon_Windchime.png",
+      "via": "dynamic"
+    },
+    "SmallGravestone": {
+      "itemId": "SmallGravestone",
+      "name": "Small Gravestone",
+      "shop": "thunder",
+      "itemType": "Decor",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Small_Gravestone.png",
+      "via": "dynamic"
+    },
+    "Milkcap": {
+      "itemId": "Milkcap",
+      "name": "Milkcap Spore",
+      "shop": "thunder",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Milkcap_Spore.png",
+      "via": "dynamic"
+    },
+    "Cattail": {
+      "itemId": "Cattail",
+      "name": "Cattail Seed",
+      "shop": "thunder",
+      "itemType": "Seed",
+      "coinPrice": null,
+      "image": "https://media.magicgarden.wiki/Cattail_Seed.png",
+      "via": "dynamic"
+    }
+  },
+  "weathers": {
+    "Rain": {
+      "weatherId": "Rain",
+      "name": "Rain",
+      "groupId": "Hydro",
+      "image": "https://media.magicgarden.wiki/Rain.png"
+    },
+    "Snow": {
+      "weatherId": "Frost",
+      "name": "Snow",
+      "groupId": "Hydro",
+      "image": "https://media.magicgarden.wiki/Frost.png"
+    },
+    "Thunderstorm": {
+      "weatherId": "Thunderstorm",
+      "name": "Thunderstorm",
+      "groupId": "Hydro",
+      "image": "https://media.magicgarden.wiki/ThunderstormIcon.png"
+    },
+    "Dawn": {
+      "weatherId": "Dawn",
+      "name": "Dawn",
+      "groupId": "Dawn",
+      "image": "https://media.magicgarden.wiki/Dawn.png"
+    },
+    "Amber Moon": {
+      "weatherId": "AmberMoon",
+      "name": "Amber Moon",
+      "groupId": "Amber",
+      "image": "https://media.magicgarden.wiki/Amber_Moon.png"
+    }
+  }
+}
