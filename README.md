@@ -4,19 +4,36 @@ A little website I made to keep an eye on the Magic Garden shops and weather.
 It logs into Discord, shows everything that's in stock, and DMs you when
 something you care about shows up.
 
-No more self-bot stuff — it reads the game's own API
+No self-bot, no channel scanning — it reads the game's own API
 (`magicgarden.gg/platform/v1/...`) directly, same data the official site uses.
 
-## What you get
+| Dashboard | Sell Calculator |
+|---|---|
+| ![Dashboard](docs/home.png) | ![Calculator](docs/calculator.png) |
 
-- **Dashboard** — current weather with a countdown, what's coming next, next shop restock, and every shop with live stock numbers and prices. Weather shops (Rain, Snow, Thunder, Dawn, Amber) show up by themselves while that weather is running — and stay browsable after it ends (saved copy, ready for bell alerts).
-- **🔔 Alerts** — tap the bell on any item and the bot DMs you when it restocks. Same for weather: one tap and you'll know the moment it starts. It only pings on *changes*, so no spam.
-- **🧮 Sell Calculator** — pick a crop, type the size, tick your mutations, get the sell price range. Uses the actual game formula (same math Daserix' calculator uses — credit where it's due, I pulled the numbers from there).
-- **Discord login** — normal OAuth, your avatar shows in the corner.
+| Notifications |
+|---|
+| ![Alerts](docs/alerts.png) |
+
+## What it does
+
+- **Dashboard** — current weather with a countdown, what's coming next, next
+  shop restock, and every shop with live stock numbers and prices. Weather
+  shops (Rain, Snow, Thunder, Dawn, Amber) appear while that weather is
+  running, and **stay browsable after it ends** from a saved copy — so you can
+  bell them anytime.
+- **🔔 Alerts** — tap the bell on any item and the bot DMs you when it
+  restocks. Weather works the same: tap a weather card and you'll know the
+  moment it starts. It only pings on real changes, so no spam.
+- **🧮 Sell Calculator** — pick a crop, type the size, tick your mutations,
+  get the sell price range. Real game formula, icons for every mutation
+  (same math Daserix' calculator uses — credit below).
+- **Dark mode** — moon button up top. Remembers your choice.
+- Works on phones and tablets too.
 
 ## Running it
 
-You need Node 20 or newer. That's it, no npm install — zero dependencies.
+Node 20 or newer. No npm install — zero dependencies.
 
 ```
 cd website
@@ -30,30 +47,43 @@ Then open `http://192.168.1.69:8000` (or whatever IP/port you set).
 Copy `config.example.json` to `config.json` and fill in three things from the
 [Discord Developer Portal](https://discord.com/developers/applications):
 
-1. **client_id / client_secret** — from your app's OAuth2 page.
-   On that same page, add `http://192.168.1.69:8000/callback` under Redirects.
-2. **bot_token** — Bot page → Reset Token. Paste it in, save the file —
-   the server picks it up without a restart, and the bot goes 🟢 online.
-3. **Invite the bot** — the "My Alerts" page has an invite link. Add it to any
-   server you share, then hit "Send me a test DM" to check it works.
+1. **client_id / client_secret** — from your app's OAuth2 page. On that same
+   page, add `http://192.168.1.69:8000/callback` under Redirects.
+2. **bot_token** — Bot page → Reset Token. Paste it in and save — the server
+   picks it up without a restart and the bot goes 🟢 online.
+3. **Join the server** — the bot can only DM people it shares a server with,
+   so members need to join: https://discord.gg/WzzkZS8CkB
+   (Self-hosting for your own crew? The Alerts page also has a normal bot
+   invite link.)
 
-If the bot shows 🟢 online on the alerts page, everything is good.
+Hit **Send me a test DM** on the alerts page to check it all works.
+
+## How notifications work
+
+A poller checks the game API every 10 seconds and keeps a snapshot of what's
+in stock and which weather is active. When something **changes** — an item
+goes from 0 stock to in stock, or a new weather window starts — everyone who
+belled that item/weather gets a DM with the details. That's why it never
+spams: it only messages on transitions, and it remembers where it left off
+across restarts.
 
 ## Files that matter
 
 ```
-server.js        the whole backend (API proxy, login, poller, bot)
-config.json      your secrets - NOT in git
-public/          the website itself
-item_meta.json   item names + wiki image links
-crop_data.json   crop stats for the calculator
-tools/           the scripts that generate those two json files
+server.js             the whole backend (API proxy, login, poller, bot)
+config.json           your secrets - NOT in git
+public/               the website itself
+item_meta.json        item names + wiki image links
+crop_data.json        crop stats for the calculator
+mutation_data.json    mutation multipliers + icons
+shop_catalogs.json    saved weather-shop catalogs (runtime)
+tools/                the scripts that generate the data files
+docs/                 the screenshots you see above
 ```
 
-`item_meta.json` grows on its own: when the game adds a new item, the server
-notices, finds its wiki image, and remembers it. Same idea for weather shops:
-`shop_catalogs.json` keeps a copy of every weather-shop catalog we've seen, so
-those items stay listed (and alertable) even while the shop is closed.
+`item_meta.json` and `shop_catalogs.json` grow on their own: when the game
+shows a new item (or a weather shop opens), the server notices, grabs the
+wiki image, and remembers it for next time.
 
 ## Changing IP or port
 
