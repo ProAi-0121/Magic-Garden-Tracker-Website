@@ -126,6 +126,12 @@ code { background: #f0e9d8; padding: 1px 6px; border-radius: 6px; font-size: 0.9
 .shop-tab.open .dot { background: #43d17c; box-shadow: 0 0 6px #43d17c; }
 .shop-tab.active { background: var(--green-500); border-color: var(--green-500); color: #fff; }
 .shop-tab.active .dot { background: #fff; }
+.shop-tab.shut { opacity: 0.65; }
+.shop-tab small { opacity: 0.75; font-size: 0.72em; }
+.saved-note {
+  background: #fff8e1; border: 2px dashed #e6c968; border-radius: 12px;
+  padding: 10px 16px; margin-bottom: 14px; font-weight: 700; color: #7a5c00;
+}
 
 /* ---------------- shop grid & item cards ---------------- */
 .shop-grid {

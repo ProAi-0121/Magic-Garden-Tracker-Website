@@ -43,6 +43,7 @@ const CONFIG_PATH = path.join(__dirname, "config.json");
 const SUBS_PATH = path.join(__dirname, "subscriptions.json");
 const SESSIONS_PATH = path.join(__dirname, "sessions.json");
 const META_PATH = path.join(__dirname, "item_meta.json");
+const CATALOGS_PATH = path.join(__dirname, "shop_catalogs.json");
 
 const API_BASE = "https://magicgarden.gg/platform/v1";
 const UA =
@@ -144,6 +145,9 @@ async function getGameData(force = false) {
   };
   apiCache = { at: Date.now(), data };
 
+  rememberCatalogs(data.shops, data.serverTime);
+  injectStoredCatalogs(data.shops);
+
   // Resolve images for any items we haven't seen before (e.g. weather-shop
   // items that only exist while that weather is active). Fire-and-forget;
   // results are cached into item_meta.json and served via /api/meta.
@@ -225,6 +229,42 @@ async function ensureItemMeta(itemId, name, shop, itemType) {
     console.log(`[meta] resolved ${itemId} (${name}) -> ${image || "no image found"}`);
   } finally {
     resolving.delete(itemId);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Weather shop memory: the API only returns catalog/items for a weather shop
+// WHILE that weather is active. We remember every catalog we've ever seen so
+// the site can still list those items (and let you subscribe to them) when
+// the shop is closed. shop_catalogs.json: { thunder: { lastSeen, catalog } }
+// ---------------------------------------------------------------------------
+const knownShops = await loadJson(CATALOGS_PATH, {});
+let catsDirty = false;
+setInterval(() => {
+  if (catsDirty) {
+    catsDirty = false;
+    saveJson(CATALOGS_PATH, knownShops).catch(() => {});
+  }
+}, 30_000);
+
+function rememberCatalogs(shops, nowIso) {
+  for (const [key, shop] of Object.entries(shops)) {
+    if (!shop.catalog || shop.catalog.length === 0) continue;
+    const prevById = new Map((knownShops[key] && knownShops[key].catalog || []).map((i) => [i.itemId, i]));
+    for (const it of shop.catalog) prevById.set(it.itemId, { ...it }); // fresh wins
+    knownShops[key] = { lastSeen: nowIso, catalog: [...prevById.values()] };
+    catsDirty = true;
+  }
+}
+
+function injectStoredCatalogs(shops) {
+  for (const [key, shop] of Object.entries(shops)) {
+    const known = knownShops[key];
+    if ((!shop.catalog || shop.catalog.length === 0) && known && known.catalog && known.catalog.length) {
+      // closed weather shop -> show the remembered items, stock zeroed
+      shop.catalog = known.catalog.map((i) => ({ ...i, stock: 0 }));
+      shop.storedFrom = known.lastSeen;
+    }
   }
 }
 

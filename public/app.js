@@ -162,8 +162,9 @@
       .map((k) => {
         const info = SHOP_LABELS[k] || { label: k, icon: "🏪" };
         const open = DATA.shops[k].open;
-        return `<button class="shop-tab ${open ? "open" : ""} ${k === activeShop ? "active" : ""}" data-shop="${k}">
-          <span class="dot"></span>${info.icon} ${info.label}</button>`;
+        const shut = !open && !MAIN_SHOPS.includes(k) ? "shut" : "";
+        return `<button class="shop-tab ${open ? "open" : ""} ${shut} ${k === activeShop ? "active" : ""}" data-shop="${k}">
+          <span class="dot"></span>${info.icon} ${info.label}${shut ? ' <small>closed</small>' : ""}</button>`;
       })
       .join("");
     tabs.querySelectorAll(".shop-tab").forEach((el) =>
@@ -209,6 +210,19 @@
     grid.querySelectorAll(".bell").forEach((b) =>
       b.addEventListener("click", () => toggleItemSub(b.dataset.item))
     );
+
+    // saved-copy hint for closed weather shops
+    const note = $("shop-note");
+    if (note) note.remove();
+    if (shop.storedFrom && !shop.open) {
+      const div = document.createElement("div");
+      div.id = "shop-note";
+      div.className = "saved-note";
+      div.innerHTML = `📦 Weather's over — this is our saved copy of the ${escapeHtml(
+        (SHOP_LABELS[activeShop] || {}).label || activeShop
+      )} catalog. Tap 🔔 to get pinged next time it restocks.`;
+      grid.before(div);
+    }
   }
 
   // ------------------------------------------------------------ subscriptions
@@ -423,9 +437,10 @@
     }
     $("cr-weight").textContent = `${(size - SIZE_STEP / 2).toFixed(2)} – ${(size + SIZE_STEP / 2).toFixed(2)} kg`;
     $("cr-mult").textContent = `×${r.mult}`;
+    const fmt = (n) => n.toLocaleString("en-US");
     $("cr-price").innerHTML = r.lo === r.hi
-      ? r.lo.toLocaleString()
-      : `${r.lo.toLocaleString()} <small>to</small> ${r.hi.toLocaleString()}`;
+      ? fmt(r.lo)
+      : `${fmt(r.lo)} <small>to</small> ${fmt(r.hi)}`;
   }
 
   function setView(v) {
