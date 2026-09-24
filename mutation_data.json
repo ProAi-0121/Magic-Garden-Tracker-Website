@@ -4,55 +4,64 @@
       "gameId": "Wet",
       "displayName": "Wet",
       "mult": 2,
-      "group": "Hydro"
+      "group": "Hydro",
+      "image": "https://media.magicgarden.wiki/Wet.png"
     },
     {
       "gameId": "Chilled",
       "displayName": "Chilled",
       "mult": 2,
-      "group": "Hydro"
+      "group": "Hydro",
+      "image": "https://media.magicgarden.wiki/Chilled.png"
     },
     {
       "gameId": "Frozen",
       "displayName": "Frozen",
       "mult": 6,
-      "group": "Hydro"
+      "group": "Hydro",
+      "image": "https://media.magicgarden.wiki/Frozen.png"
     },
     {
       "gameId": "Thunderstruck",
       "displayName": "Thunderstruck",
       "mult": 5,
-      "group": "Hydro"
+      "group": "Hydro",
+      "image": "https://media.magicgarden.wiki/Thunderstruck.png"
     },
     {
       "gameId": "Thundercharged",
       "displayName": "Thundercharged",
       "mult": 7,
-      "group": "Hydro"
+      "group": "Hydro",
+      "image": "https://media.magicgarden.wiki/Thundercharged.png"
     },
     {
       "gameId": "Dawnlit",
       "displayName": "Dawnlit",
       "mult": 4,
-      "group": "Dawn"
+      "group": "Dawn",
+      "image": "https://media.magicgarden.wiki/Dawnlit.png"
     },
     {
       "gameId": "Ambershine",
       "displayName": "Ambershine",
       "mult": 6,
-      "group": "Amber"
+      "group": "Amber",
+      "image": "https://media.magicgarden.wiki/Amberlit.png"
     },
     {
       "gameId": "Dawncharged",
       "displayName": "Dawnbound",
       "mult": 7,
-      "group": "Dawn"
+      "group": "Dawn",
+      "image": "https://media.magicgarden.wiki/Dawnbound.png"
     },
     {
       "gameId": "Ambercharged",
       "displayName": "Amberbound",
       "mult": 10,
-      "group": "Amber"
+      "group": "Amber",
+      "image": "https://media.magicgarden.wiki/Amberbound.png"
     }
   ],
   "visual": [
