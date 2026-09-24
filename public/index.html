@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/style.css?v=2" />
+  <link rel="stylesheet" href="/style.css?v=3" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>" />
 </head>
 <body>
@@ -27,7 +27,8 @@
       <button id="nav-alerts" class="navlink">🔔 My Alerts <span id="alert-count" class="pill" hidden>0</span></button>
     </nav>
     <div class="userbox" id="userbox">
-      <!-- filled by app.js: login button OR avatar + name + logout -->
+      <!-- filled by app.js: theme toggle + login button OR avatar + name + logout -->
+      <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">🌙</button>
     </div>
   </header>
 
@@ -78,40 +79,54 @@
           <h2>🧮 Sell Price Calculator</h2>
           <p class="muted">Same math as the game: price = base × size × mutations, then friend bonus. Prices are a range because the game rolls the weight within the displayed size.</p>
 
-          <div class="calc-grid">
-            <label class="fld">
-              <span>Crop</span>
-              <select id="calc-crop"></select>
-            </label>
-
-            <label class="fld">
-              <span>Size (displayed kg / value)</span>
-              <input id="calc-size" type="number" step="any" min="0" placeholder="e.g. 4.5" />
-            </label>
-
-            <label class="fld">
-              <span>Friend bonus %</span>
-              <input id="calc-friend" type="number" step="1" min="0" max="100" value="0" />
-            </label>
-          </div>
-
-          <div class="fld" style="margin-top:14px">
-            <span>Mutations</span>
-            <div id="calc-mutations" class="mut-chips"><!-- injected --></div>
-          </div>
-
-          <div id="calc-result" class="calc-result">
-            <div class="cr-row">
-              <span class="muted">Weight range rolled</span>
-              <b id="cr-weight">—</b>
+          <div class="calc-layout">
+            <!-- crop preview -->
+            <div class="calc-visual" id="calc-visual">
+              <img id="cv-img" src="" alt="" hidden />
+              <div class="m-emoji" id="cv-fallback" style="font-size:3.4em">🌱</div>
+              <div class="cv-name" id="cv-name">—</div>
+              <div class="cv-rarity" id="cv-rarity"></div>
+              <div class="cv-stats" id="cv-stats"></div>
             </div>
-            <div class="cr-row">
-              <span class="muted">Mutation multiplier</span>
-              <b id="cr-mult">×1</b>
-            </div>
-            <div class="cr-total">
-              <span>Sell price</span>
-              <span class="cr-price" id="cr-price">—</span>
+
+            <!-- inputs + result -->
+            <div>
+              <div class="calc-grid">
+                <label class="fld">
+                  <span>Crop</span>
+                  <select id="calc-crop"></select>
+                </label>
+
+                <label class="fld">
+                  <span>Size (kg)</span>
+                  <input id="calc-size" type="number" step="any" min="0" placeholder="e.g. 4.5" />
+                </label>
+
+                <label class="fld">
+                  <span>Friend bonus %</span>
+                  <input id="calc-friend" type="number" step="1" min="0" max="100" value="0" />
+                </label>
+              </div>
+
+              <div class="mut-section">
+                <span class="fld"><span>Mutations</span></span>
+                <div id="calc-mutations" class="mut-chips"><!-- injected --></div>
+              </div>
+
+              <div id="calc-result" class="calc-result">
+                <div class="cr-row">
+                  <span class="muted">Weight range rolled</span>
+                  <b id="cr-weight">—</b>
+                </div>
+                <div class="cr-row">
+                  <span class="muted">Mutation multiplier</span>
+                  <b id="cr-mult">×1</b>
+                </div>
+                <div class="cr-total">
+                  <span>Sell price</span>
+                  <span class="cr-price" id="cr-price">—</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -124,6 +139,7 @@
             <li><b>Formula:</b> round(baseSellPrice × scale × mutMult), then friend bonus.</li>
             <li><b>Range:</b> the game rounds the real weight to the displayed size, so real value can be a bit above or below — that's the ±range shown.</li>
           </ul>
+          <div class="mut-legend" id="mut-legend"><!-- injected --></div>
           <p class="muted" style="margin-top:10px">Formula &amp; crop data adapted from <a href="https://daserix.github.io/magic-garden-calculator/" target="_blank" rel="noopener">Daserix' Magic Garden Calculator</a>.</p>
         </div>
       </div>
@@ -137,8 +153,12 @@
           <p class="muted">You'll get a Discord DM the moment one of these shows up in any shop.</p>
           <div id="alert-items" class="alert-chips"></div>
           <h2 style="margin-top:22px">🌦️ Weather alerts</h2>
-          <p class="muted">Get a DM as soon as one of these weathers starts.</p>
-          <div id="alert-weathers" class="alert-chips"></div>
+          <p class="muted">Tap a weather to switch its alert on or off. You'll get a DM the moment it starts.</p>
+          <div id="weather-picker" class="weather-picker"><!-- injected --></div>
+          <div class="alert-chips" style="margin-top:6px">
+            <span class="muted">Active:</span>
+            <span id="alert-weathers" class="alert-chips" style="display:inline"></span>
+          </div>
         </div>
 
         <div class="card bot-card">
@@ -165,6 +185,6 @@
   </footer>
 
   <div id="toast-wrap"></div>
-  <script src="/app.js?v=2"></script>
+  <script src="/app.js?v=3"></script>
 </body>
 </html>
