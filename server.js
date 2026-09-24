@@ -335,9 +335,94 @@ async function checkBotToken() {
 }
 
 // ---------------------------------------------------------------------------
-// Discord gateway: keeps the bot showing as ONLINE (DMs work without this,
-// but presence makes it obvious the tracker is alive).
+// Server-membership: DMs only work if the user shares a server with the bot.
+// We ask for the guilds.join scope at login, then:
+//   1. resolve our guild id (from config or by following the invite code)
+//   2. check if the user is already a member
+//   3. if not, auto-join them using their fresh OAuth token
 // ---------------------------------------------------------------------------
+const GUILD_STATE = { id: config.guild_id || null, resolvedAt: 0 };
+
+async function resolveGuildId() {
+  if (!config.bot_token) return null;
+  if (GUILD_STATE.id && Date.now() - GUILD_STATE.resolvedAt < 10 * 60_000) return GUILD_STATE.id;
+  if (config.guild_id) {
+    GUILD_STATE.id = config.guild_id;
+    GUILD_STATE.resolvedAt = Date.now();
+    return GUILD_STATE.id;
+  }
+  if (!config.invite_code) return null;
+  try {
+    const res = await fetch(`${DISCORD_API}/invites/${encodeURIComponent(config.invite_code)}`, {
+      headers: { Authorization: `Bot ${config.bot_token}` },
+    });
+    if (res.ok) {
+      const inv = await res.json();
+      GUILD_STATE.id = inv.guild ? inv.guild.id : null;
+      GUILD_STATE.resolvedAt = Date.now();
+      if (GUILD_STATE.id) console.log(`[guild] resolved guild ${GUILD_STATE.id} from invite code`);
+      return GUILD_STATE.id;
+    }
+    console.log(`[guild] invite lookup failed: ${res.status} (set "guild_id" in config.json)`);
+  } catch (e) {
+    console.log(`[guild] invite lookup error: ${e.message}`);
+  }
+  return null;
+}
+
+// member check against our guild (bot token)
+async function isMember(guildId, userId) {
+  try {
+    const res = await fetch(`${DISCORD_API}/guilds/${guildId}/members/${userId}`, {
+      headers: { Authorization: `Bot ${config.bot_token}` },
+    });
+    if (res.status === 200) return true;
+    if (res.status === 404) return false;
+    console.log(`[guild] member check ${res.status} - assuming not a member`);
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// join the user to our guild with their OAuth token (needs guilds.join scope)
+async function joinGuild(accessToken, userId) {
+  const guildId = await resolveGuildId();
+  if (!guildId) return { joined: false, reason: "guild not resolved" };
+  try {
+    const res = await fetch(`${DISCORD_API}/guilds/${guildId}/members/${userId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bot ${config.bot_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ access_token: accessToken }),
+    });
+    // 201 = joined, 204 = already a member, 400/403 = missing scope/bot not in guild
+    if (res.status === 201 || res.status === 204) {
+      console.log(`[guild] user ${userId} is in the server (auto-join ok)`);
+      return { joined: true };
+    }
+    const body = await res.text().catch(() => "");
+    console.log(`[guild] auto-join ${res.status}: ${body.slice(0, 120)}`);
+    return { joined: false, reason: `HTTP ${res.status}` };
+  } catch (e) {
+    return { joined: false, reason: e.message };
+  }
+}
+
+// Check + auto-fix membership for a freshly logged-in user. Returns status
+// for the UI: "member" | "joined" | "needs_join" | "unknown"
+async function ensureMembership(accessToken, userId) {
+  const guildId = await resolveGuildId();
+  if (!guildId) return "unknown"; // bot token/invite not set up yet
+  if (await isMember(guildId, userId)) return "member";
+  const r = await joinGuild(accessToken, userId);
+  return r.joined ? "joined" : "needs_join";
+}
+
+// ---------------------------------------------------------------------------
+// Discord gateway: keeps the bot showing as ONLINE (DMs work without this,
 const gateway = { ws: null, connected: false, since: null, lastSeq: null, hbTimer: null, delay: 2000 };
 
 function botPublicStatus() {
@@ -458,6 +543,13 @@ function baseEmbed(title, color, lines) {
 
 const relTime = (iso) => `<t:${Math.floor(new Date(iso).getTime() / 1000)}:R>`;
 
+// price of an entry, used to sort restock notifications expensive-first
+const priceOf = (meta, entry) => {
+  if (entry && entry.coinPrice != null) return entry.coinPrice;
+  if (meta && meta.coinPrice != null) return meta.coinPrice;
+  return -1; // unknown price sinks to the bottom
+};
+
 async function checkNotifications() {
   let data;
   try {
@@ -504,11 +596,15 @@ async function checkNotifications() {
           `Ends ${relTime(cur.endsAt)}.`,
         ]);
         if (wm.image) embed.image = { url: wm.image };
-        sendDm(uid, { embeds: [embed] });
+        // content carries the mention so the user actually gets pinged
+        sendDm(uid, { content: `<@${uid}>`, embeds: [embed] });
       }
     }
 
     // ---------------- Restock notifications (transitions only) ----------------
+    // Collect everything that just came back, across all shops, then send
+    // ONE message with the most expensive item first.
+    const restocks = [];
     for (const itemId of s.items || []) {
       const entries = inStockNow.get(itemId);
       if (!entries) continue;
@@ -516,20 +612,42 @@ async function checkNotifications() {
         const key = `${itemId}|${entry.shop}`;
         if (lastStockKeys.has(key)) continue; // already in stock last poll -> not news
         const meta = ITEM_META.items[itemId] || {};
-        const lines = [
-          `**${meta.name || itemId}** just came back in stock!`,
-          ``,
-          `Shop: **${entry.shop}**`,
-          `Stock: **${entry.stock}**`,
-        ];
-        if (entry.coinPrice != null) {
-          lines.push(`Price: **${entry.coinPrice.toLocaleString()}** coins`);
-        }
-        const embed = baseEmbed(`\`\`\`🛒 ${meta.name || itemId} in stock!\`\`\``, 0x2ecc71, lines);
-        if (meta.image) embed.thumbnail = { url: meta.image };
-        sendDm(uid, { embeds: [embed] });
+        restocks.push({ itemId, meta, entry });
       }
     }
+    if (restocks.length === 0) continue;
+
+    // expensive -> cheap
+    restocks.sort((a, b) => priceOf(b.meta, b.entry) - priceOf(a.meta, a.entry));
+
+    // one embed per item (embeds can't hold multiple images, so each item
+    // gets its own embed with its thumbnail). The mention + a compact
+    // "name - stock" list ride along in the message content; only the
+    // mention in the FIRST message pings.
+    const embeds = restocks.slice(0, 10).map((r, i) => {
+      const e = baseEmbed(
+        `\`\`\`🛒 ${r.meta.name || r.itemId} in stock!\`\`\``,
+        0x2ecc71,
+        [
+          `Shop: **${r.entry.shop}**`,
+          `Stock: **${r.entry.stock}**`,
+          r.entry.coinPrice != null ? `Price: **${r.entry.coinPrice.toLocaleString()}** coins` : null,
+        ].filter(Boolean)
+      );
+      if (r.meta.image) e.thumbnail = { url: r.meta.image };
+      return e;
+    });
+
+    const summary = restocks
+      .slice(0, 10)
+      .map((r) => `> ${r.meta.name || r.itemId} - ${r.entry.stock}`)
+      .join("\n");
+
+    const content = restocks.length > 10
+      ? `<@${uid}>\n${summary}\n*(+${restocks.length - 10} more)*`
+      : `<@${uid}>\n${summary}`;
+
+    sendDm(uid, { content, embeds });
   }
 
   // roll snapshots forward
@@ -726,7 +844,9 @@ const server = http.createServer(async (req, res) => {
         client_id: config.client_id,
         redirect_uri: config.redirect_uri,
         response_type: "code",
-        scope: "identify",
+        // guilds.join lets us add the user to our server automatically
+        // guilds.members.read lets us check whether they're already in it
+        scope: "identify guilds.join guilds.members.read",
         state: crypto.randomBytes(12).toString("hex"),
         prompt: "consent",
       });
@@ -748,13 +868,24 @@ const server = http.createServer(async (req, res) => {
         avatar: discordUser.avatar
           ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=64`
           : null,
+        joined: false,
       };
+      // try to add them to our server right away (guilds.join scope).
+      // if they're already a member this is instant; if they decline to
+      // join, the site shows the join callout instead.
+      try {
+        user.joined = await ensureMembership(token.access_token, user.id);
+      } catch (e) {
+        console.log(`[guild] membership check failed: ${e.message}`);
+        user.joined = "unknown";
+      }
       const sessionToken = createSession(user);
       res.setHeader(
         "Set-Cookie",
         `mg_session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`
       );
-      res.writeHead(302, { Location: "/" });
+      const showJoinedToast = user.joined === "joined" ? "?justjoined=1" : "";
+      res.writeHead(302, { Location: `/${showJoinedToast}` });
       return res.end();
     }
 
