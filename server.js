@@ -88,8 +88,12 @@ const saveJson = (file, data) =>
 // ---------------------------------------------------------------------------
 // Sessions (cookie token -> { user })
 // ---------------------------------------------------------------------------
+const SESSION_TTL = 30 * 24 * 60 * 60_000; // 30 days
 const sessions = new Map(Object.entries(await loadJson(SESSIONS_PATH, {})));
 const persistSessions = () => saveJson(SESSIONS_PATH, Object.fromEntries(sessions));
+
+// pending OAuth states (CSRF tokens): state -> issuedAt
+const oauthStates = new Map();
 
 function parseCookies(req) {
   const out = {};
@@ -111,7 +115,14 @@ function createSession(user) {
 function getSessionUser(req) {
   const token = parseCookies(req).mg_session;
   if (!token || !sessions.has(token)) return null;
-  return sessions.get(token).user;
+  const s = sessions.get(token);
+  // expired session? drop it and treat as logged out
+  if (!s.createdAt || Date.now() - s.createdAt > SESSION_TTL) {
+    sessions.delete(token);
+    persistSessions().catch(() => {});
+    return null;
+  }
+  return s.user;
 }
 
 // ---------------------------------------------------------------------------
@@ -290,8 +301,24 @@ async function discordApi(endpoint, options = {}) {
   return res.json().catch(() => null);
 }
 
+// DM flood guard: max messages per user per minute (the poller batches, so a
+// legit user gets 1-3; this catches anyone gaming subscriptions).
+const DM_LIMIT = 8; // per user per 60s
+const dmSent = new Map(); // userId -> [timestamps]
+
 async function sendDm(userId, payload) {
   if (!config.bot_token) return false;
+  // flood check
+  const now = Date.now();
+  const recent = pruneWindow(dmSent.get(userId) || [], now, 60_000);
+  if (recent.length >= DM_LIMIT) {
+    console.log(`[bot] DM to ${userId} suppressed (rate limit)`);
+    dmSent.set(userId, recent);
+    return false;
+  }
+  recent.push(now);
+  dmSent.set(userId, recent);
+
   try {
     let dmChannelId = DM_CACHE.get(userId);
     if (!dmChannelId) {
@@ -749,14 +776,81 @@ function sendFile(res, filePath) {
     .catch(() => sendJson(res, 404, { error: "not found" }));
 }
 
+// ---------------------------------------------------------------------------
+// Security: per-IP rate limiting, request caps, abuse tracking.
+// A small sliding-window limiter — enough to stop request spam and brute
+// forcing without any external deps. Buckets: global, per-IP, per-IP+route.
+// ---------------------------------------------------------------------------
+const RATE_LIMITS = {
+  windowMs: 60_000, // per-minute windows
+  global: 2000, // whole server (all IPs)
+  ip: 120, // per IP per minute
+  api: 40, // per IP on /api/* data endpoints
+  auth: 6, // per IP on /login + /callback (OAuth is expensive + Discord-side)
+  dm: 3, // per user per 5 min on /api/test-dm
+};
+
+const rateState = {
+  global: new Map(), // "all" -> [timestamps]
+  ip: new Map(), // ip -> [timestamps]
+  api: new Map(), // ip -> [timestamps]
+  auth: new Map(), // ip -> [timestamps]
+  dm: new Map(), // userId -> [timestamps]
+  blocked: new Map(), // ip -> { until, strikes }
+};
+
+function pruneWindow(arr, now, ms) {
+  while (arr.length && arr[0] <= now - ms) arr.shift();
+  return arr;
+}
+
+function hitRate(key, map, limit, windowMs) {
+  const now = Date.now();
+  const arr = pruneWindow(map.get(key) || [], now, windowMs);
+  arr.push(now);
+  map.set(key, arr);
+  return arr.length > limit; // true = over the limit
+}
+
+// Periodic cleanup so the maps can't grow forever under an IP-flood.
+setInterval(() => {
+  const now = Date.now();
+  pruneWindow(rateState.global, now, RATE_LIMITS.windowMs * 2);
+  for (const [k, v] of rateState.ip) {
+    pruneWindow(v, now, RATE_LIMITS.windowMs * 2);
+    if (!v.length) rateState.ip.delete(k);
+  }
+  for (const [k, v] of rateState.api) {
+    pruneWindow(v, now, RATE_LIMITS.windowMs * 2);
+    if (!v.length) rateState.api.delete(k);
+  }
+  for (const [k, v] of rateState.auth) {
+    pruneWindow(v, now, RATE_LIMITS.windowMs * 2);
+    if (!v.length) rateState.auth.delete(k);
+  }
+  for (const [k, v] of rateState.dm) {
+    pruneWindow(v, 5 * 60_000, 5 * 60_000);
+    if (!v.length) rateState.dm.delete(k);
+  }
+}, 60_000).unref();
+
+// ------------------------------------------------------- request body caps
+const MAX_BODY = 20_000; // 20KB is far more than any legit request needs
+
 function readBody(req) {
   return new Promise((resolve) => {
     let raw = "";
+    let dead = false;
     req.on("data", (c) => {
       raw += c;
-      if (raw.length > 100_000) req.destroy();
+      if (raw.length > MAX_BODY) {
+        dead = true;
+        req.destroy();
+        resolve({});
+      }
     });
     req.on("end", () => {
+      if (dead) return;
       try {
         resolve(JSON.parse(raw || "{}"));
       } catch {
@@ -766,12 +860,82 @@ function readBody(req) {
   });
 }
 
+// ------------------------------------------------------- security headers
+function securityHeaders(res) {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  // our api only ever serves json from these routes; keep browsers from
+  // sniffing anything else into executing
+  res.setHeader("Content-Security-Policy", "default-src 'none'");
+}
+
 // ---------------------------------------------------------------------------
 // HTTP server + routes
 // ---------------------------------------------------------------------------
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
   const p = url.pathname;
+
+  // ---- basic request hygiene ----
+  securityHeaders(res);
+  if (req.method !== "GET" && req.method !== "POST" && req.method !== "HEAD") {
+    return sendJson(res, 405, { error: "method not allowed" });
+  }
+  // oversized URLs are never legit here
+  if (req.url.length > 2048) {
+    return sendJson(res, 414, { error: "uri too long" });
+  }
+  // the site is served over plain http on a LAN; still don't let proxies
+  // cache or script tag the api
+  res.setHeader("X-Robots-Tag", "noindex");
+
+  const ip =
+    (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
+    req.socket.remoteAddress ||
+    "?";
+
+  // ---- abusive-IP blocklist (repeated offenders get 15 min of silence) ----
+  const blocked = rateState.blocked.get(ip);
+  if (blocked && blocked.until > Date.now()) {
+    return sendJson(res, 429, { error: "slow down" });
+  }
+  if (blocked && blocked.until <= Date.now()) rateState.blocked.delete(ip);
+
+  // ---- global cap (someone flooding from many IPs) ----
+  if (hitRate("all", rateState.global, RATE_LIMITS.global, RATE_LIMITS.windowMs)) {
+    return sendJson(res, 429, { error: "server busy" });
+  }
+
+  // ---- per-IP cap ----
+  const isLoopback = ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1";
+  if (hitRate(ip, rateState.ip, RATE_LIMITS.ip, RATE_LIMITS.windowMs)) {
+    // loopback (your own machine) gets throttled but never hard-blocked,
+    // so you can't lock yourself out while testing
+    if (!isLoopback) {
+      const strikes = (blocked && blocked.strikes) || 0;
+      if (strikes >= 3) {
+        rateState.blocked.set(ip, { until: Date.now() + 15 * 60_000, strikes: 0 });
+        console.log(`[security] IP ${ip} blocked for 15 min (repeat offender)`);
+      } else {
+        rateState.blocked.set(ip, { until: 0, strikes: strikes + 1 });
+      }
+    }
+    return sendJson(res, 429, { error: "too many requests" });
+  }
+
+  // ---- per-IP caps for sensitive route groups ----
+  if (p.startsWith("/api/")) {
+    if (hitRate(ip, rateState.api, RATE_LIMITS.api, RATE_LIMITS.windowMs)) {
+      return sendJson(res, 429, { error: "too many api requests" });
+    }
+  }
+  if (p === "/login" || p === "/callback") {
+    if (hitRate(ip, rateState.auth, RATE_LIMITS.auth, RATE_LIMITS.windowMs)) {
+      return sendJson(res, 429, { error: "too many login attempts, wait a minute" });
+    }
+  }
 
   try {
     // ---------------- API: live game data (cached proxy) ----------------
@@ -820,12 +984,17 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true, subs: subs[user.id] });
     }
 
-    // ---------------- API: test DM (login required) ----------------
+    // ---------------- API: test DM (login required, cooldown) ----------------
     if (p === "/api/test-dm" && req.method === "POST") {
       const user = getSessionUser(req);
       if (!user) return sendJson(res, 401, { error: "not logged in" });
       if (!config.bot_token) {
         return sendJson(res, 400, { error: "no bot token configured in website/config.json" });
+      }
+      // 3 per 5 minutes per user - stops people burning our Discord rate
+      // limits (or our bot token) by hammering this button
+      if (hitRate(user.id, rateState.dm, RATE_LIMITS.dm, 5 * 60_000)) {
+        return sendJson(res, 429, { error: "test DM cooldown - wait a few minutes" });
       }
       const ok = await sendDm(user.id, {
         embeds: [
@@ -840,6 +1009,16 @@ const server = http.createServer(async (req, res) => {
 
     // ---------------- Discord OAuth: start login ----------------
     if (p === "/login") {
+      // CSRF token: issued here, must come back on /callback untouched.
+      // Also hard-caps the number of pending logins so nobody can make us
+      // track millions of states.
+      const state = crypto.randomBytes(16).toString("hex");
+      oauthStates.set(state, Date.now());
+      if (oauthStates.size > 500) {
+        // drop the oldest half
+        const keys = [...oauthStates.keys()].slice(0, 250);
+        for (const k of keys) oauthStates.delete(k);
+      }
       const params = new URLSearchParams({
         client_id: config.client_id,
         redirect_uri: config.redirect_uri,
@@ -847,7 +1026,7 @@ const server = http.createServer(async (req, res) => {
         // guilds.join lets us add the user to our server automatically
         // guilds.members.read lets us check whether they're already in it
         scope: "identify guilds.join guilds.members.read",
-        state: crypto.randomBytes(12).toString("hex"),
+        state,
         prompt: "consent",
       });
       return sendJson(res, 200, { url: `https://discord.com/oauth2/authorize?${params}` });
@@ -856,8 +1035,17 @@ const server = http.createServer(async (req, res) => {
     // ---------------- Discord OAuth: callback ----------------
     if (p === "/callback") {
       const code = url.searchParams.get("code");
+      const state = url.searchParams.get("state");
       if (!code) {
         return sendJson(res, 400, { error: "missing code", discord: url.searchParams.get("error_description") });
+      }
+      // CSRF check: the state we generated at /login must come back to us.
+      // Expired (10 min) or unknown states are rejected.
+      const issuedAt = oauthStates.get(state);
+      oauthStates.delete(state); // single-use
+      if (!issuedAt || Date.now() - issuedAt > 10 * 60_000) {
+        console.log("[security] rejected oauth callback (bad/expired state)");
+        return sendJson(res, 400, { error: "login session expired - go back and try again" });
       }
       const token = await oauthExchange(code);
       const discordUser = await fetchDiscordUser(token.access_token);
@@ -917,6 +1105,11 @@ const server = http.createServer(async (req, res) => {
 });
 
 const PORT = Number(config.port) || 8000;
+// kill slow/rogue connections so a flood can't tie up sockets
+server.headersTimeout = 10_000; // time to receive headers
+server.requestTimeout = 30_000; // time to receive the whole request
+server.keepAliveTimeout = 15_000;
+server.maxRequestsPerSocket = 200; // force reconnects, spreads the load
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Magic Garden tracker running at http://192.168.1.69:${PORT}`);
   console.log(`Redirect URI configured: ${config.redirect_uri}`);
