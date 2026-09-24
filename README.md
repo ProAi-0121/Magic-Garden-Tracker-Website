@@ -33,7 +33,7 @@ Copy `config.example.json` to `config.json` and fill in three things from the
 1. **client_id / client_secret** — from your app's OAuth2 page.
    On that same page, add `http://192.168.1.69:8000/callback` under Redirects.
 2. **bot_token** — Bot page → Reset Token. Paste it in, save the file —
-   the server picks it up without a restart.
+   the server picks it up without a restart, and the bot goes 🟢 online.
 3. **Invite the bot** — the "My Alerts" page has an invite link. Add it to any
    server you share, then hit "Send me a test DM" to check it works.
 
