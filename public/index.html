@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/style.css?v=3" />
+  <link rel="stylesheet" href="/style.css?v=4" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>" />
 </head>
 <body>
@@ -164,16 +164,22 @@
         <div class="card bot-card">
           <h2>🤖 Discord bot</h2>
           <div id="bot-status" class="bot-status">Checking…</div>
+          <div class="join-callout">
+            <b>📲 One-time step:</b> join our Discord server — the bot can only DM
+            people it shares a server with, so this is what makes notifications work.
+            <a class="btn btn-discord btn-sm" href="https://discord.gg/WzzkZS8CkB" target="_blank" rel="noopener" style="margin-top:10px">
+              Join the server
+            </a>
+          </div>
           <p class="muted" id="bot-help" hidden>
             The bot token isn't set yet. Open
             <code>website/config.json</code> and paste your bot token into
             <code>"bot_token"</code> (Discord Developer Portal → Bot → Reset Token),
             then restart <code>node server.js</code>.
           </p>
-          <button id="btn-test-dm" class="btn btn-primary">Send me a test DM</button>
+          <button id="btn-test-dm" class="btn btn-primary" style="margin-top:12px">Send me a test DM</button>
           <p class="muted" style="margin-top:12px">
-            First time? <a id="bot-invite" href="#" target="_blank" rel="noopener">Invite the bot</a>
-            to any server you're in, then send the test DM.
+            Self-hosting? You can also <a id="bot-invite" href="#" target="_blank" rel="noopener">invite the bot</a> to your own server.
           </p>
         </div>
       </div>
@@ -185,6 +191,6 @@
   </footer>
 
   <div id="toast-wrap"></div>
-  <script src="/app.js?v=3"></script>
+  <script src="/app.js?v=4"></script>
 </body>
 </html>

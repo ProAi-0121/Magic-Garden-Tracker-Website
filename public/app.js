@@ -604,6 +604,7 @@
         <li>🛒 Live stock for Seeds, Eggs, Tools & Decor</li>
         <li>🌦️ Weather shop tracking (Rain, Snow, Thunder, Dawn, Amber Moon)</li>
         <li>🔔 Personal Discord DMs when your items restock</li>
+        <li>📲 DMs need our Discord server — <a href="https://discord.gg/WzzkZS8CkB" target="_blank" rel="noopener">join it here</a></li>
       </ul>
       <button class="btn btn-discord" id="btn-login-hero">Login with Discord</button>`;
     main.prepend(div);
