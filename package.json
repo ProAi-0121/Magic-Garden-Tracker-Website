@@ -1,0 +1,14 @@
+{
+  "name": "magic-garden-tracker",
+  "version": "1.0.0",
+  "description": "Live Magic Garden shop & weather tracker with Discord login and DM alerts",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

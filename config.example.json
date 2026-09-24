@@ -1,0 +1,7 @@
+{
+  "client_id": "YOUR_DISCORD_APP_CLIENT_ID",
+  "client_secret": "YOUR_DISCORD_APP_OAUTH_SECRET",
+  "bot_token": "YOUR_BOT_TOKEN",
+  "redirect_uri": "http://192.168.1.69:8000/callback",
+  "port": 8000
+}

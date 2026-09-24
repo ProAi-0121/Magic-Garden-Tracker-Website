@@ -1,0 +1,11 @@
+# never commit secrets or runtime state
+config.json
+sessions.json
+subscriptions.json
+
+# logs
+*.log
+
+# os junk
+Thumbs.db
+.DS_Store
