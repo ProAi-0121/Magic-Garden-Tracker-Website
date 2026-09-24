@@ -156,6 +156,8 @@
       const s = DATA.shops[k];
       return (s.catalog && s.catalog.length) || (s.items && s.items.length);
     });
+    // weather shop closed while we were looking at it -> hop back to seeds
+    if (!keys.includes(activeShop)) activeShop = "seed";
     tabs.innerHTML = keys
       .map((k) => {
         const info = SHOP_LABELS[k] || { label: k, icon: "🏪" };
