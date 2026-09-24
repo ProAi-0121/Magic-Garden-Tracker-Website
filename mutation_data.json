@@ -1,0 +1,70 @@
+{
+  "elemental": [
+    {
+      "gameId": "Wet",
+      "displayName": "Wet",
+      "mult": 2,
+      "group": "Hydro"
+    },
+    {
+      "gameId": "Chilled",
+      "displayName": "Chilled",
+      "mult": 2,
+      "group": "Hydro"
+    },
+    {
+      "gameId": "Frozen",
+      "displayName": "Frozen",
+      "mult": 6,
+      "group": "Hydro"
+    },
+    {
+      "gameId": "Thunderstruck",
+      "displayName": "Thunderstruck",
+      "mult": 5,
+      "group": "Hydro"
+    },
+    {
+      "gameId": "Thundercharged",
+      "displayName": "Thundercharged",
+      "mult": 7,
+      "group": "Hydro"
+    },
+    {
+      "gameId": "Dawnlit",
+      "displayName": "Dawnlit",
+      "mult": 4,
+      "group": "Dawn"
+    },
+    {
+      "gameId": "Ambershine",
+      "displayName": "Ambershine",
+      "mult": 6,
+      "group": "Amber"
+    },
+    {
+      "gameId": "Dawncharged",
+      "displayName": "Dawnbound",
+      "mult": 7,
+      "group": "Dawn"
+    },
+    {
+      "gameId": "Ambercharged",
+      "displayName": "Amberbound",
+      "mult": 10,
+      "group": "Amber"
+    }
+  ],
+  "visual": [
+    {
+      "gameId": "Gold",
+      "displayName": "Gold",
+      "mult": 25
+    },
+    {
+      "gameId": "Rainbow",
+      "displayName": "Rainbow",
+      "mult": 50
+    }
+  ]
+}
