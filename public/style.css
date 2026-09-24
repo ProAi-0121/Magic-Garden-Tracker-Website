@@ -60,6 +60,13 @@ body {
   transition: background 0.4s ease, color 0.25s ease;
 }
 
+/* centered content container */
+main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 22px;
+}
+
 h1, h2, h3, .brand-name, .wb-name, .shop-tab, .btn { font-family: "Baloo 2", cursive; }
 
 .muted { color: var(--muted); font-size: 0.92em; }
@@ -427,6 +434,13 @@ body.dark .cr-price { color: #7ee29a; }
 .login-hero .perks { list-style: none; margin: 0 0 26px; }
 .login-hero .perks li { margin: 7px 0; font-weight: 700; }
 
+/* ---------------- join callout (discord server) ---------------- */
+.join-callout {
+  background: color-mix(in srgb, #5865f2 10%, var(--chip-bg));
+  border: 2px dashed color-mix(in srgb, #5865f2 45%, var(--chip-border));
+  border-radius: 12px; padding: 12px 14px; margin: 10px 0 4px; font-size: 0.95em;
+}
+
 /* ---------------- toast ---------------- */
 #toast-wrap { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 100; }
 .toast {
@@ -446,10 +460,108 @@ body.dark .cr-price { color: #7ee29a; }
 
 footer { text-align: center; padding: 26px 10px 34px; color: var(--muted); font-size: 0.9em; }
 
-@media (max-width: 860px) {
-  .strip-row, .alerts-wrap { grid-template-columns: 1fr; }
-  .weather-banner { flex-direction: column; align-items: flex-start; }
-  .topbar { flex-wrap: wrap; }
-  .userbox { margin-left: 0; }
+/* =========================================================
+   RESPONSIVE — tablets (<= 980px) and phones (<= 640px)
+   ========================================================= */
+@media (max-width: 980px) {
+  /* header: allow nav to wrap under the brand on tablets */
+  .topbar { flex-wrap: wrap; gap: 8px 14px; padding: 10px 16px; }
+  .topnav { order: 3; width: 100%; margin-left: 0; overflow-x: auto; padding-bottom: 2px; }
+  .userbox { margin-left: auto; }
+  .alerts-wrap { grid-template-columns: 1fr; }
+  .strip-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  /* ---------- base & layout ---------- */
+  main { padding: 0 12px; }
+  .weather-banner { margin-top: 14px; }
+  .strip-row { gap: 10px; margin-bottom: 14px; }
+
+  /* ---------- header: compact, two rows ---------- */
+  .topbar { padding: 8px 10px; gap: 6px; }
+  .brand { font-size: 1.12em; }
+  .brand-leaf { font-size: 1.2em; }
+  .topnav {
+    order: 3; width: 100%; margin-left: 0;
+    display: flex; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .topnav::-webkit-scrollbar { display: none; }
+  .navlink { padding: 7px 12px; font-size: 0.95em; white-space: nowrap; flex: 0 0 auto; }
+  .userbox { gap: 6px; }
+  .userbox .uname { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .theme-btn { width: 34px; height: 34px; font-size: 0.95em; }
+  .btn-sm { padding: 6px 12px; }
+  .btn-discord { padding: 8px 14px; }
+
+  /* ---------- weather banner stacks ---------- */
+  .weather-banner { flex-direction: column; align-items: stretch; padding: 14px 16px; }
+  .wb-left { justify-content: flex-start; }
+  .wb-icon { font-size: 2.4em; }
+  .wb-icon img { width: 52px; height: 52px; }
+  .wb-name { font-size: 1.4em; }
+  .wb-right { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+  .wb-count { text-align: left; margin-bottom: 0; }
+
+  /* ---------- cards & grids ---------- */
+  .shop-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .item-card { padding: 14px 10px 10px; }
+  .item-card .item-img { width: 58px; height: 58px; }
+  .item-name { font-size: 0.92em; min-height: 2.4em; }
+  .item-price { font-size: 0.92em; }
+  .badge { font-size: 0.72em; padding: 2px 8px; }
+  .item-card .bell { font-size: 1.35em; top: 6px; right: 6px; }
+
+  .shop-tab { padding: 7px 14px; font-size: 0.95em; }
+  .shop-tab small { display: none; }
+  .shop-tabs { gap: 6px; margin-bottom: 12px; }
+
+  .upcoming-list { gap: 6px; }
+  .upcoming-chip { padding: 5px 9px; font-size: 0.9em; }
+  .upcoming-chip img { width: 22px; height: 22px; }
+  .restock-count { font-size: 1.5em; }
+  .strip { padding: 12px 14px; }
+
+  /* ---------- calculator ---------- */
+  .calc-layout { grid-template-columns: 1fr; gap: 14px; }
+  .calc-visual { position: static; flex-direction: row; text-align: left; justify-content: flex-start; gap: 14px; padding: 14px; }
+  .calc-visual img, #cv-fallback { width: 84px; height: 84px; font-size: 2.4em !important; flex: 0 0 auto; }
+  .calc-visual .cv-stats { text-align: left; }
+  .calc-grid { grid-template-columns: 1fr; gap: 10px; }
+  .cr-price { font-size: 1.8em; }
+  .mut-chip { padding: 6px 12px 6px 6px; font-size: 0.9em; }
+  .mut-chip img, .mut-chip .m-emoji { width: 22px; height: 22px; }
+
+  /* ---------- alerts page ---------- */
+  .weather-picker { grid-template-columns: repeat(2, 1fr); }
+  .w-card img, .w-card .w-emoji { width: 36px; height: 36px; font-size: 1.7em; }
+  .card { padding: 16px 14px; }
+  .a-chip { font-size: 0.9em; padding: 4px 10px; }
+  .a-chip img { width: 20px; height: 20px; }
+
+  /* ---------- login hero ---------- */
+  .login-hero { margin: 26px 8px; padding: 28px 18px; }
+  .login-hero h1 { font-size: 1.7em; }
+  .login-hero .perks li { margin: 6px 0; font-size: 0.95em; }
+
+  /* ---------- toasts full-width-ish ---------- */
+  #toast-wrap { left: 12px; right: 12px; bottom: 12px; }
+  .toast { text-align: center; }
+
+  footer { padding: 18px 8px 26px; font-size: 0.82em; }
+}
+
+/* very small phones */
+@media (max-width: 380px) {
+  .shop-grid { grid-template-columns: repeat(2, 1fr); }
+  .weather-picker { grid-template-columns: 1fr 1fr; }
+  .brand-name { font-size: 0.95em; }
+}
+
+/* touch: bigger hit targets */
+@media (hover: none) {
+  .item-card .bell { opacity: 0.6; }
+  .navlink, .btn, .shop-tab, .w-card, .mut-chip { -webkit-tap-highlight-color: transparent; }
 }
 
