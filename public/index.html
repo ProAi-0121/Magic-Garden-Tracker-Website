@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magic Garden Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>" />
+</head>
+<body>
+  <!-- floating decorative clouds -->
+  <div class="cloud c1">☁️</div>
+  <div class="cloud c2">☁️</div>
+  <div class="cloud c3">☁️</div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-leaf">🌱</span>
+      <span class="brand-name">Magic Garden <em>Tracker</em></span>
+    </div>
+    <nav class="topnav">
+      <button id="nav-dashboard" class="navlink active">Dashboard</button>
+      <button id="nav-calc" class="navlink">🧮 Sell Calculator</button>
+      <button id="nav-alerts" class="navlink">🔔 My Alerts <span id="alert-count" class="pill" hidden>0</span></button>
+    </nav>
+    <div class="userbox" id="userbox">
+      <!-- filled by app.js: login button OR avatar + name + logout -->
+    </div>
+  </header>
+
+  <main>
+    <!-- ======================= DASHBOARD VIEW ======================= -->
+    <section id="view-dashboard">
+      <!-- current weather banner -->
+      <div id="weather-banner" class="weather-banner">
+        <div class="wb-left">
+          <div class="wb-icon" id="wb-icon">🌤️</div>
+          <div>
+            <div class="wb-label">Weather right now</div>
+            <div class="wb-name" id="wb-name">Clear skies</div>
+          </div>
+        </div>
+        <div class="wb-right">
+          <div class="wb-count" id="wb-count"></div>
+          <button class="btn btn-ghost btn-sm" id="wb-sub">🔔 Alert me for this weather</button>
+        </div>
+      </div>
+
+      <!-- upcoming weather + restock strip -->
+      <div class="strip-row">
+        <div class="strip upcoming-strip">
+          <div class="strip-title">🔮 Upcoming weather</div>
+          <div id="upcoming-list" class="upcoming-list">
+            <div class="muted">Loading…</div>
+          </div>
+        </div>
+        <div class="strip restock-strip">
+          <div class="strip-title">⏰ Next shop restock</div>
+          <div class="restock-count" id="restock-count">—</div>
+          <div class="muted" id="restock-at"></div>
+        </div>
+      </div>
+
+      <!-- shop tabs -->
+      <div class="shop-tabs" id="shop-tabs"><!-- tabs injected --></div>
+
+      <!-- shop grid -->
+      <div id="shop-grid" class="shop-grid"><!-- cards injected --></div>
+    </section>
+
+    <!-- ======================= CALCULATOR VIEW ======================= -->
+    <section id="view-calc" hidden>
+      <div class="calc-wrap">
+        <div class="card calc-card">
+          <h2>🧮 Sell Price Calculator</h2>
+          <p class="muted">Same math as the game: price = base × size × mutations, then friend bonus. Prices are a range because the game rolls the weight within the displayed size.</p>
+
+          <div class="calc-grid">
+            <label class="fld">
+              <span>Crop</span>
+              <select id="calc-crop"></select>
+            </label>
+
+            <label class="fld">
+              <span>Size (displayed kg / value)</span>
+              <input id="calc-size" type="number" step="any" min="0" placeholder="e.g. 4.5" />
+            </label>
+
+            <label class="fld">
+              <span>Friend bonus %</span>
+              <input id="calc-friend" type="number" step="1" min="0" max="100" value="0" />
+            </label>
+          </div>
+
+          <div class="fld" style="margin-top:14px">
+            <span>Mutations</span>
+            <div id="calc-mutations" class="mut-chips"><!-- injected --></div>
+          </div>
+
+          <div id="calc-result" class="calc-result">
+            <div class="cr-row">
+              <span class="muted">Weight range rolled</span>
+              <b id="cr-weight">—</b>
+            </div>
+            <div class="cr-row">
+              <span class="muted">Mutation multiplier</span>
+              <b id="cr-mult">×1</b>
+            </div>
+            <div class="cr-total">
+              <span>Sell price</span>
+              <span class="cr-price" id="cr-price">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card calc-info">
+          <h3>How it works</h3>
+          <ul class="how-list">
+            <li><b>Size → scale:</b> scale = weight ÷ base weight (each crop has a base kg).</li>
+            <li><b>Multiplier:</b> elemental mutations <i>add</i> (each adds mult−1); Gold/Rainbow <i>replace</i> (×25 / ×50).</li>
+            <li><b>Formula:</b> round(baseSellPrice × scale × mutMult), then friend bonus.</li>
+            <li><b>Range:</b> the game rounds the real weight to the displayed size, so real value can be a bit above or below — that's the ±range shown.</li>
+          </ul>
+          <p class="muted" style="margin-top:10px">Formula &amp; crop data adapted from <a href="https://daserix.github.io/magic-garden-calculator/" target="_blank" rel="noopener">Daserix' Magic Garden Calculator</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= ALERTS VIEW ======================= -->
+    <section id="view-alerts" hidden>
+      <div class="alerts-wrap">
+        <div class="card alerts-card">
+          <h2>🔔 Your item alerts</h2>
+          <p class="muted">You'll get a Discord DM the moment one of these shows up in any shop.</p>
+          <div id="alert-items" class="alert-chips"></div>
+          <h2 style="margin-top:22px">🌦️ Weather alerts</h2>
+          <p class="muted">Get a DM as soon as one of these weathers starts.</p>
+          <div id="alert-weathers" class="alert-chips"></div>
+        </div>
+
+        <div class="card bot-card">
+          <h2>🤖 Discord bot</h2>
+          <div id="bot-status" class="bot-status">Checking…</div>
+          <p class="muted" id="bot-help" hidden>
+            The bot token isn't set yet. Open
+            <code>website/config.json</code> and paste your bot token into
+            <code>"bot_token"</code> (Discord Developer Portal → Bot → Reset Token),
+            then restart <code>node server.js</code>.
+          </p>
+          <button id="btn-test-dm" class="btn btn-primary">Send me a test DM</button>
+          <p class="muted" style="margin-top:12px">
+            First time? <a id="bot-invite" href="#" target="_blank" rel="noopener">Invite the bot</a>
+            to any server you're in, then send the test DM.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Data from magicgarden.gg · images from magicgarden.wiki · fan-made tracker, not affiliated with Magic Circle Studio
+  </footer>
+
+  <div id="toast-wrap"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
