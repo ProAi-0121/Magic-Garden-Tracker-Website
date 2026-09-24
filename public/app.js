@@ -55,6 +55,7 @@
   }
 
   const fmtPrice = (n) => (n == null ? "—" : n.toLocaleString("en-US"));
+  const fmtInt = (n) => Number(n).toLocaleString("en-US");
   const itemMeta = (itemId) => (META ? META.items[itemId] || null : null);
   const imgTag = (item, cls = "item-img") => {
     const m = itemMeta(item.itemId);
@@ -269,6 +270,7 @@
     }
     await saveSubs();
     renderWeather();
+    renderWeatherPicker();
     renderAlertsPage();
   }
 
@@ -278,10 +280,38 @@
     return `<span class="a-chip">${img ? `<img src="${img}" alt="" />` : "🏷️"}${escapeHtml(label)}${x}</span>`;
   }
 
+  // all weathers the game has, as big toggle cards
+  const ALL_WEATHERS = [
+    { name: "Rain", emoji: "🌧️" },
+    { name: "Snow", emoji: "❄️" },
+    { name: "Thunderstorm", emoji: "⛈️" },
+    { name: "Dawn", emoji: "🌅" },
+    { name: "Amber Moon", emoji: "🌙" },
+  ];
+
+  function renderWeatherPicker() {
+    const el = $("weather-picker");
+    if (!el || !META) return;
+    el.innerHTML = ALL_WEATHERS.map((w) => {
+      const meta = META.weathers[w.name] || {};
+      const on = ME && SUBS.weathers.includes(w.name);
+      return `<button class="w-card ${on ? "on" : ""}" data-weather="${escapeHtml(w.name)}" title="${on ? "Alert on" : "Alert off"}">
+        ${meta.image ? `<img src="${meta.image}" alt="" />` : `<span class="w-emoji">${w.emoji}</span>`}
+        <span class="w-name">${escapeHtml(w.name)}</span>
+        <span class="w-state">${on ? "🔔 on" : "off"}</span>
+      </button>`;
+    }).join("");
+    el.querySelectorAll("[data-weather]").forEach((btn) =>
+      btn.addEventListener("click", () => toggleWeatherSub(btn.dataset.weather))
+    );
+  }
+
   function renderAlertsPage() {
     const wi = $("alert-items");
     const ww = $("alert-weathers");
     if (!META) return; // meta not loaded yet; refresh() re-renders after load
+
+    renderWeatherPicker();
 
     if (!ME) {
       wi.innerHTML = `<span class="a-chip none">Log in to set alerts</span>`;
@@ -297,17 +327,15 @@
         })
         .join("") || `<span class="a-chip none">No item alerts yet — tap 🔔 on any item card</span>`;
 
+    // removal for weathers happens via the picker cards above
     ww.innerHTML =
       SUBS.weathers
-        .map((w) => chipHtml(w, (META.weathers[w] || {}).image, true))
-        .join("") || `<span class="a-chip none">No weather alerts yet — use the weather banner</span>`;
+        .map((w) => chipHtml(w, (META.weathers[w] || {}).image, false))
+        .join("") || `<span class="a-chip none">none yet — tap a weather above</span>`;
 
     // remove handlers (index-based)
     wi.querySelectorAll("[data-remove]").forEach((el, idx) =>
       el.addEventListener("click", () => toggleItemSub(SUBS.items[idx]))
-    );
-    ww.querySelectorAll("[data-remove]").forEach((el, idx) =>
-      el.addEventListener("click", () => toggleWeatherSub(SUBS.weathers[idx]))
     );
   }
 
@@ -344,7 +372,12 @@
     if (!CROPS || !MUTS) return; // /api/crops not loaded yet; refresh() will call us again
     const cropSel = $("calc-crop");
     if (!cropSel) return;
-    if (cropSel.dataset.ready === "1") return;
+    if (cropSel.dataset.ready === "1") {
+      renderCalcVisual();
+      renderMutLegend();
+      calc();
+      return;
+    }
     cropSel.dataset.ready = "1";
 
     cropSel.innerHTML = Object.values(CROPS)
@@ -355,10 +388,13 @@
       calcState.crop = cropSel.value;
       calcState.mutations.clear();
       renderMutations();
+      renderCalcVisual();
       calc();
     });
 
     renderMutations();
+    renderCalcVisual();
+    renderMutLegend();
     $("calc-size").addEventListener("input", calc);
     $("calc-friend").addEventListener("input", calc);
     calc();
@@ -366,17 +402,22 @@
 
   function renderMutations() {
     const wrap = $("calc-mutations");
+    const icon = (m) =>
+      m.image
+        ? `<img src="${m.image}" alt="" />`
+        : `<span class="m-emoji">${m.gameId === "Gold" ? "🥇" : "🌈"}</span>`;
     const chip = (m) => {
       const isVisual = !m.group;
       const note = isVisual ? `×${m.mult}` : `+${m.mult - 1}`;
       const on = calcState.mutations.has(m.gameId) ? "on" : "";
-      return `<button class="mut-chip ${isVisual ? "visual" : ""} ${on}" data-mut="${m.gameId}" title="${isVisual ? "replaces other visual" : "stacks additively"}">
-        ${escapeHtml(m.displayName)} <small>${note}</small></button>`;
+      const cls = `mut-chip ${isVisual ? "visual" : ""} ${m.gameId === "Rainbow" ? "rainbow-chip" : ""} ${on}`;
+      return `<button class="${cls}" data-mut="${m.gameId}" title="${isVisual ? "replaces other visuals" : "stacks additively"}">
+        ${icon(m)} ${escapeHtml(m.displayName)} <small>${note}</small></button>`;
     };
     wrap.innerHTML =
       MUTS.elemental.map(chip).join("") +
       MUTS.visual.map(chip).join("") +
-      `<span class="mut-chip both-note">elemental stack, Gold/Rainbow replace</span>`;
+      `<span class="mut-chip both-note">elemental stack · Gold/Rainbow replace</span>`;
 
     wrap.querySelectorAll("[data-mut]").forEach((el) => {
       el.addEventListener("click", () => {
@@ -395,6 +436,58 @@
         calc();
       });
     });
+  }
+
+  // update the crop preview panel (image, rarity color, stats)
+  function renderCalcVisual() {
+    const c = CROPS[calcState.crop];
+    if (!c) return;
+    const meta = itemMeta(c.gameId) || {};
+    const img = $("cv-img");
+    const fb = $("cv-fallback");
+    if (meta.image) {
+      img.src = meta.image;
+      img.hidden = false;
+      fb.hidden = true;
+    } else {
+      img.hidden = true;
+      fb.hidden = false;
+      fb.textContent = "🌱";
+    }
+    $("cv-name").textContent = c.displayName;
+    const r = c.rarity || "Common";
+    const rr = $("cv-rarity");
+    rr.textContent = r;
+    rr.style.color = RARITY_COLORS[r] || "var(--muted)";
+    $("cv-stats").innerHTML =
+      `<span>base sell <b>${fmtInt(c.baseSellPrice)}</b></span>` +
+      `<span>base weight <b>${c.baseWeight} kg</b></span>` +
+      `<span>max scale <b>×${c.maxScale}</b></span>` +
+      (c.multiharvest ? `<span>multi-harvest</span>` : "");
+  }
+
+  const RARITY_COLORS = {
+    Common: "#8f9a91",
+    Uncommon: "#7cb342",
+    Rare: "#42a5f5",
+    Legendary: "#ffa726",
+    Mythical: "#ab47bc",
+    Divine: "#26c6da",
+    Celestial: "#e91e63",
+  };
+
+  // small "how it works" legend with the mutation icons
+  function renderMutLegend() {
+    const el = $("mut-legend");
+    if (!el || !MUTS) return;
+    const icon = (m) => (m.image ? `<img src="${m.image}" alt="" width="20" height="20" />` : (m.gameId === "Gold" ? "🥇" : "🌈"));
+    el.innerHTML =
+      MUTS.elemental
+        .map((m) => `<span class="a-chip">${icon(m)} ${escapeHtml(m.displayName)} <small>+${m.mult - 1}</small></span>`)
+        .join("") +
+      MUTS.visual
+        .map((m) => `<span class="a-chip">${icon(m)} ${escapeHtml(m.displayName)} <small>×${m.mult}</small></span>`)
+        .join("");
   }
 
   // ---- the game's exact sell-price formula ----
@@ -429,18 +522,52 @@
     const friend = parseFloat($("calc-friend").value) || 0;
     const c = CROPS[calcState.crop];
     const r = calcPrice(calcState.crop, size, calcState.mutations, friend);
+    const priceEl = $("cr-price");
     if (!r || !isFinite(r.lo) || !isFinite(r.hi)) {
       $("cr-weight").textContent = "—";
       $("cr-mult").textContent = "×1";
-      $("cr-price").innerHTML = "enter a size";
+      priceEl.innerHTML = "enter a size";
       return;
     }
     $("cr-weight").textContent = `${(size - SIZE_STEP / 2).toFixed(2)} – ${(size + SIZE_STEP / 2).toFixed(2)} kg`;
     $("cr-mult").textContent = `×${r.mult}`;
-    const fmt = (n) => n.toLocaleString("en-US");
-    $("cr-price").innerHTML = r.lo === r.hi
-      ? fmt(r.lo)
-      : `${fmt(r.lo)} <small>to</small> ${fmt(r.hi)}`;
+    priceEl.innerHTML = r.lo === r.hi
+      ? fmtInt(r.lo)
+      : `${fmtInt(r.lo)} <small>to</small> ${fmtInt(r.hi)}`;
+    // little pop + shine every time the number changes
+    priceEl.classList.remove("tick");
+    void priceEl.offsetWidth;
+    priceEl.classList.add("tick");
+    const box = $("calc-result");
+    box.classList.remove("flash");
+    void box.offsetWidth;
+    box.classList.add("flash");
+  }
+
+  // ------------------------------------------------------------ theme toggle
+  function applyTheme(t) {
+    document.body.classList.toggle("dark", t === "dark");
+    const btn = $("theme-toggle");
+    if (btn) btn.textContent = t === "dark" ? "☀️" : "🌙";
+  }
+
+  function initTheme() {
+    let saved = null;
+    try {
+      saved = localStorage.getItem("mg_theme");
+    } catch {}
+    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    applyTheme(saved || (prefersDark ? "dark" : "light"));
+    const btn = $("theme-toggle");
+    if (btn) {
+      btn.addEventListener("click", () => {
+        const next = document.body.classList.contains("dark") ? "light" : "dark";
+        applyTheme(next);
+        try {
+          localStorage.setItem("mg_theme", next);
+        } catch {}
+      });
+    }
   }
 
   function setView(v) {
@@ -451,6 +578,11 @@
     $("nav-dashboard").classList.toggle("active", v === "dashboard");
     $("nav-calc").classList.toggle("active", v === "calc");
     $("nav-alerts").classList.toggle("active", v === "alerts");
+    // little entrance animation on the section we just revealed
+    const sec = $(v === "dashboard" ? "view-dashboard" : v === "calc" ? "view-calc" : "view-alerts");
+    sec.classList.remove("view-anim");
+    void sec.offsetWidth; // restart the animation
+    sec.classList.add("view-anim");
     if (v === "calc") initCalculator();
   }
 
@@ -553,6 +685,7 @@
 
   // ------------------------------------------------------------ boot
   async function boot() {
+    initTheme();
     $("nav-dashboard").addEventListener("click", () => setView("dashboard"));
     $("nav-calc").addEventListener("click", () => setView("calc"));
     $("nav-alerts").addEventListener("click", () => setView("alerts"));
