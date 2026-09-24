@@ -159,6 +159,17 @@
     });
     // weather shop closed while we were looking at it -> hop back to seeds
     if (!keys.includes(activeShop)) activeShop = "seed";
+    // open shops first, closed weather shops after
+    keys.sort((a, b) => {
+      const openA = DATA.shops[a].open ? 0 : 1;
+      const openB = DATA.shops[b].open ? 0 : 1;
+      if (openA !== openB) return openA - openB;
+      // keep the main shops in their familiar order before weather ones
+      const mainA = MAIN_SHOPS.includes(a) ? 0 : 1;
+      const mainB = MAIN_SHOPS.includes(b) ? 0 : 1;
+      if (mainA !== mainB) return mainA - mainB;
+      return keys.indexOf(a) - keys.indexOf(b);
+    });
     tabs.innerHTML = keys
       .map((k) => {
         const info = SHOP_LABELS[k] || { label: k, icon: "🏪" };
@@ -197,8 +208,10 @@
         shop.open && !MAIN_SHOPS.includes(activeShop)
           ? `<span class="badge weather-open">${wm.icon || ""} weather shop</span>`
           : "";
+      // green/red border tells you what's buyable at a glance
+      const stockCls = stocked ? "in-stock" : "out-of-stock";
       return `
-        <div class="item-card ${stocked ? "" : "out"}">
+        <div class="item-card ${stockCls} ${stocked ? "" : "out"}">
           ${ME ? `<button class="bell ${subbed ? "on" : ""}" data-item="${escapeHtml(cat.itemId)}" title="${subbed ? "Remove alert" : "Alert me when in stock"}">🔔</button>` : ""}
           ${imgTag(cat)}
           <div class="item-name">${escapeHtml(cat.name)}</div>

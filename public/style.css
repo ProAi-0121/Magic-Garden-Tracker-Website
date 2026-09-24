@@ -235,6 +235,12 @@ body.dark .weather-banner.active {
   transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   animation: cardIn 0.35s ease both;
 }
+/* stock state is visible at a glance: green = buyable, red = wait for restock */
+.item-card.in-stock { border-color: #66bb6a; }
+.item-card.in-stock:hover { border-color: #43a047; }
+body.dark .item-card.in-stock { border-color: #3d8b52; }
+.item-card.out-of-stock { border-color: #ef9a9a; }
+body.dark .item-card.out-of-stock { border-color: #8a4a4a; }
 .item-card:hover {
   transform: translateY(-4px) scale(1.015);
   box-shadow: var(--shadow-lg);
