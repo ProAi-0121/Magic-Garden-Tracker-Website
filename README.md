@@ -9,7 +9,7 @@ No more self-bot stuff — it reads the game's own API
 
 ## What you get
 
-- **Dashboard** — current weather with a countdown, what's coming next, next shop restock, and every shop with live stock numbers and prices. Weather shops (Rain, Snow, Thunder, Dawn, Amber) show up by themselves while that weather is running.
+- **Dashboard** — current weather with a countdown, what's coming next, next shop restock, and every shop with live stock numbers and prices. Weather shops (Rain, Snow, Thunder, Dawn, Amber) show up by themselves while that weather is running — and stay browsable after it ends (saved copy, ready for bell alerts).
 - **🔔 Alerts** — tap the bell on any item and the bot DMs you when it restocks. Same for weather: one tap and you'll know the moment it starts. It only pings on *changes*, so no spam.
 - **🧮 Sell Calculator** — pick a crop, type the size, tick your mutations, get the sell price range. Uses the actual game formula (same math Daserix' calculator uses — credit where it's due, I pulled the numbers from there).
 - **Discord login** — normal OAuth, your avatar shows in the corner.
@@ -51,7 +51,9 @@ tools/           the scripts that generate those two json files
 ```
 
 `item_meta.json` grows on its own: when the game adds a new item, the server
-notices, finds its wiki image, and remembers it.
+notices, finds its wiki image, and remembers it. Same idea for weather shops:
+`shop_catalogs.json` keeps a copy of every weather-shop catalog we've seen, so
+those items stay listed (and alertable) even while the shop is closed.
 
 ## Changing IP or port
 

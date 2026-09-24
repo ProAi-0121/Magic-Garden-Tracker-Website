@@ -2,6 +2,7 @@
 config.json
 sessions.json
 subscriptions.json
+shop_catalogs.json
 
 # logs
 *.log
