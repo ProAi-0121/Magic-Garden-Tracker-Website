@@ -384,14 +384,19 @@
       .sort((a, b) => a.displayName.localeCompare(b.displayName))
       .map((c) => `<option value="${c.gameId}">${escapeHtml(c.displayName)} (${c.rarity})</option>`)
       .join("");
+    cropSel.value = calcState.crop; // select and preview must agree
     cropSel.addEventListener("change", () => {
       calcState.crop = cropSel.value;
       calcState.mutations.clear();
       renderMutations();
       renderCalcVisual();
+      // nothing typed yet? suggest this crop's base weight so there's
+      // an immediate, sensible price on screen
+      if (!$("calc-size").value) $("calc-size").value = CROPS[calcState.crop].baseWeight;
       calc();
     });
 
+    if (!$("calc-size").value) $("calc-size").value = CROPS[calcState.crop].baseWeight;
     renderMutations();
     renderCalcVisual();
     renderMutLegend();
@@ -578,6 +583,9 @@
     $("nav-dashboard").classList.toggle("active", v === "dashboard");
     $("nav-calc").classList.toggle("active", v === "calc");
     $("nav-alerts").classList.toggle("active", v === "alerts");
+    // keep the url in sync so #calc / #alerts links work
+    const want = v === "dashboard" ? "" : v;
+    if (location.hash !== `#${want}`) history.replaceState(null, "", want ? `#${want}` : location.pathname);
     // little entrance animation on the section we just revealed
     const sec = $(v === "dashboard" ? "view-dashboard" : v === "calc" ? "view-calc" : "view-alerts");
     sec.classList.remove("view-anim");
@@ -587,6 +595,12 @@
   }
 
   function renderLoginHero() {
+    // only on the dashboard - it would just push the calc/alerts down
+    if (view !== "dashboard") {
+      const hero = $("login-hero");
+      if (hero) hero.remove();
+      return;
+    }
     const main = document.querySelector("main");
     if (ME) {
       const hero = $("login-hero");
@@ -625,6 +639,9 @@
       renderWeather();
       renderTabs();
       renderShop();
+      // first meta load (re)paints the alerts page too - it may have been
+      // skipped earlier when we navigated straight to #alerts
+      renderAlertsPage();
     } catch (e) {
       toast(`Failed to load shop data: ${e.message}`, true);
     }
@@ -703,7 +720,10 @@
       }
       btn.disabled = false;
     });
-    setView("dashboard");
+    // deep links: #calc / #alerts open the right page directly
+    // (read the hash BEFORE the first setView, which rewrites the url)
+    const initial = location.hash.replace("#", "");
+    setView(["calc", "alerts"].includes(initial) ? initial : "dashboard");
     await refreshMe();
     renderLoginHero();
     await refresh();
