@@ -344,12 +344,22 @@
     const el = $("bot-status");
     const help = $("bot-help");
     const btn = $("btn-test-dm");
+    const callout = $("join-callout");
+    // hide the "join our server" box once we know they're in the server.
+    // (older sessions predating auto-join have no joined flag -> show it)
+    if (callout) {
+      const inServer = ME && (ME.joined === "member" || ME.joined === "joined");
+      callout.hidden = Boolean(inServer);
+    }
     const onlineBadge = bot.online ? " · 🟢 online" : " · ⚪ offline";
     if (bot.client_id) {
       $("bot-invite").href = `https://discord.com/oauth2/authorize?client_id=${bot.client_id}&scope=bot&permissions=0`;
     }
     if (bot.configured && bot.ok) {
-      el.innerHTML = `<span class="ok">✅ ${escapeHtml(bot.username || "bot")}${onlineBadge}</span>`;
+      el.innerHTML = `<span class="ok">✅ ${escapeHtml(bot.username || "bot")}${onlineBadge}</span>` +
+        (ME && (ME.joined === "member" || ME.joined === "joined")
+          ? `\n<span class="ok" style="font-size:0.85em">📲 You're in our Discord server — DMs will work.</span>`
+          : "");
       help.hidden = true;
       btn.disabled = false;
     } else if (bot.configured) {
@@ -724,6 +734,11 @@
     // (read the hash BEFORE the first setView, which rewrites the url)
     const initial = location.hash.replace("#", "");
     setView(["calc", "alerts"].includes(initial) ? initial : "dashboard");
+    // greeted right after the bot auto-joined them to our server at login
+    if (new URLSearchParams(location.search).get("justjoined")) {
+      toast("📲 You've been added to our Discord server — notifications enabled!");
+      history.replaceState(null, "", "/");
+    }
     await refreshMe();
     renderLoginHero();
     await refresh();
