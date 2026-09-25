@@ -606,13 +606,37 @@ const priceOf = (meta, entry) => {
 };
 
 // ---------------------------------------------------------------------------
-// Item history: every restock/sellout event, newest first, capped.
-// history.json: { itemId: { events: [{t, inStock, stock, shop, price}] } }
-// Powers the item popup graph. Kept in memory, flushed to disk.
+// Item history: RESTOCKS ONLY ("when was it in stock"), newest first, capped.
+// history.json: { itemId: { events: [{t, stock, shop, price}] } }
+// Powers the item popup. Kept in memory, flushed to disk periodically.
 // ---------------------------------------------------------------------------
-const HISTORY_CAP = 200; // keep the last 200 events per item
+const HISTORY_CAP = 100; // keep the last 100 restocks per item
 const HISTORY_TTL = 48 * 60 * 60_000; // and nothing older than 48h
+const HISTORY_COALESCE_MS = 90_000; // events closer than this = same restock
 const history = await loadJson(HISTORY_PATH, {});
+
+// One-time cleanup of older data: drop out-of-stock events and merge
+// 1ms-apart duplicates into single restocks.
+let historyCleaned = false;
+for (const id of Object.keys(history)) {
+  const evs = (history[id].events || [])
+    .filter((e) => e && e.t && e.inStock !== false)
+    .sort((a, b) => b.t - a.t);
+  const kept = [];
+  for (const e of evs) {
+    const last = kept[kept.length - 1];
+    if (last && e.t - last.t < HISTORY_COALESCE_MS) continue; // same restock
+    kept.push({ t: e.t, stock: e.stock ?? null, shop: e.shop ?? null, price: e.price ?? null });
+  }
+  if (kept.length !== (history[id].events || []).length) historyCleaned = true;
+  if (kept.length) history[id] = { events: kept.slice(0, HISTORY_CAP) };
+  else delete history[id];
+}
+if (historyCleaned) {
+  saveJson(HISTORY_PATH, history).catch(() => {});
+  console.log("[history] cleaned old events (out-of-stock + duplicates removed)");
+}
+
 let historyDirty = false;
 setInterval(() => {
   if (historyDirty) {
@@ -621,12 +645,14 @@ setInterval(() => {
   }
 }, 15_000);
 
-function recordHistory(itemId, inStock, stock, shop, price, t = Date.now()) {
+function recordHistory(itemId, stock, shop, price, t = Date.now()) {
   if (!history[itemId]) history[itemId] = { events: [] };
   const ev = history[itemId].events;
   const last = ev[0];
-  if (last && last.t === t && last.inStock === inStock) return; // dup guard
-  ev.unshift({ t, inStock, stock, shop, price });
+  // same shop restocking within the coalesce window = same restock, skip.
+  // this kills the double-record from the two scan passes per poll.
+  if (last && last.shop === shop && t - last.t < HISTORY_COALESCE_MS) return;
+  ev.unshift({ t, stock, shop, price });
   const cutoff = Date.now() - HISTORY_TTL;
   history[itemId].events = ev.filter((e) => e.t >= cutoff).slice(0, HISTORY_CAP);
   historyDirty = true;
@@ -687,26 +713,17 @@ async function checkNotifications() {
     return;
   }
 
-  // --- history: record stock transitions for every item (popup data) ---
+  // --- history: record RESTOCKS ONLY for every item (popup data) ---
   const prevKeys = new Set(lastStockKeys);
   for (const [shopKey, shop] of Object.entries(data.shops)) {
     const itemMap = new Map((shop.items || []).map((i) => [i.itemId, i]));
     for (const cat of shop.catalog || []) {
       const live = itemMap.get(cat.itemId);
       const stock = live ? live.stock ?? 0 : 0;
-      const inStock = stock > 0;
       const key = `${cat.itemId}|${shopKey}`;
-      if (prevKeys.has(key) !== inStock) {
-        recordHistory(cat.itemId, inStock, stock, shopKey, live ? live.coinPrice : cat.coinPrice);
-      }
-    }
-  }
-  // items in stock that some shop lists only in "items" (no catalog entry)
-  for (const [shopKey, shop] of Object.entries(data.shops)) {
-    for (const it of shop.items || []) {
-      const key = `${it.itemId}|${shopKey}`;
-      if (!prevKeys.has(key) && (it.stock ?? 0) > 0) {
-        recordHistory(it.itemId, true, it.stock, shopKey, it.coinPrice);
+      // transition: was out (or unknown) -> now in stock = a restock
+      if (stock > 0 && !prevKeys.has(key)) {
+        recordHistory(cat.itemId, stock, shopKey, live.coinPrice);
       }
     }
   }

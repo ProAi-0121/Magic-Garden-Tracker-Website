@@ -438,7 +438,7 @@
           <a class="btn btn-ghost" href="https://magicgarden.wiki/wiki/${encodeURIComponent((m.name || itemId).replace(/ /g, "_"))}" target="_blank" rel="noopener">Wiki ↗</a>
         </div>
         <div class="modal-hist">
-          <div class="strip-title">📈 Last 24 hours</div>
+          <div class="strip-title">🕐 When it was in stock — last 24h</div>
           <div class="muted" id="modal-loading">Loading history…</div>
           <div id="modal-timeline" class="timeline" hidden></div>
           <div id="modal-graph" class="mini-graph"></div>
@@ -495,58 +495,57 @@
     tl.hidden = false;
     tl.innerHTML = evs
       .map((e) => {
-        const cls = e.inStock ? "tl-in" : "tl-out";
-        const label = e.inStock ? `in stock${e.stock ? ` ×${e.stock}` : ""}` : "sold out";
-        return `<div class="tl-item ${cls}">
+        const clock = new Date(e.t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const shop = e.shop ? ` · ${escapeHtml((SHOP_LABELS[e.shop] || {}).label || e.shop)}` : "";
+        return `<div class="tl-item tl-in">
           <span class="tl-dot"></span>
-          <span class="tl-label">${label}</span>
-          <span class="tl-time">${timeAgo(e.t)}</span>
+          <span class="tl-label">restocked${e.stock ? ` · ${e.stock}×` : ""}${shop}</span>
+          <span class="tl-time" title="${escapeHtml(new Date(e.t).toLocaleString())}">${clock} · ${timeAgo(e.t)}</span>
         </div>`;
       })
       .join("");
 
-    renderMiniGraph($("modal-graph"), evs);
+    renderRestockStrip($("modal-graph"), evs);
   }
 
-  // interactive svg sparkline of stock over the last 24h
-  function renderMiniGraph(box, evs) {
+  // 24h restock strip: one glowing tick per recorded restock moment.
+  // we only track restocks (not sellouts), so dots on a line are the honest
+  // picture - a cluster of ticks = a busy restock wave.
+  function renderRestockStrip(box, evs) {
     if (!box) return;
-    const cut = Date.now() - 24 * 3600_000;
-    const pts = evs.filter((e) => e.t >= cut).reverse();
-    if (pts.length < 2) {
-      box.innerHTML = `<div class="muted" style="margin-top:8px">Not enough data for a graph yet — check back after the next restock.</div>`;
+    const now = Date.now();
+    const cut = now - 24 * 3600_000;
+    const pts = evs.filter((e) => e.t >= cut);
+    if (!pts.length) {
+      box.innerHTML = `<div class="muted" style="margin:8px 4px 4px">No restocks in the last 24 hours.</div>`;
       return;
     }
-    const W = 560, H = 130, PAD = 10;
-    const t0 = pts[0].t;
-    const t1 = Math.max(pts[pts.length - 1].t, Date.now());
-    const maxStock = Math.max(4, ...pts.map((p) => p.stock || 0));
-    const x = (t) => PAD + ((t - t0) / Math.max(1, t1 - t0)) * (W - 2 * PAD);
-    const y = (s) => H - PAD - ((s || 0) / maxStock) * (H - 2 * PAD);
-    // step path: hold each state until the next event
-    let path = "";
-    for (let i = 0; i < pts.length; i++) {
-      const p = pts[i];
-      const v = p.inStock ? p.stock : 0;
-      const nx = pts[i + 1] ? pts[i + 1].t : t1;
-      path += `M ${x(p.t).toFixed(1)} ${y(v).toFixed(1)} L ${x(nx).toFixed(1)} ${y(v).toFixed(1)} `;
-    }
-    const dots = pts
-      .map(
-        (p) =>
-          `<circle class="g-dot ${p.inStock ? "gd-in" : "gd-out"}" cx="${x(p.t).toFixed(1)}" cy="${y(p.inStock ? p.stock : 0).toFixed(1)}" r="4"><title>${escapeHtml(new Date(p.t).toLocaleString())} — ${p.inStock ? `in stock ×${p.stock}` : "sold out"}</title></circle>`
-      )
+    const W = 560, H = 74, PAD = 14;
+    const x = (t) => PAD + ((t - cut) / (24 * 3600_000)) * (W - 2 * PAD);
+    const fmtT = (t) => new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const ticks = pts
+      .map((p) => {
+        const px = x(p.t).toFixed(1);
+        const shop = (SHOP_LABELS[p.shop] || {}).label || p.shop || "";
+        const tip = `${escapeHtml(new Date(p.t).toLocaleString())} — in stock ×${p.stock ?? "?"}${shop ? ` · ${escapeHtml(shop)}` : ""}`;
+        return `<g class="g-tick"><title>${tip}</title><line x1="${px}" y1="14" x2="${px}" y2="44"/><circle cx="${px}" cy="44" r="4"/></g>`;
+      })
       .join("");
-    const grid = (s, cls) =>
-      `<line class="g-grid ${cls || ""}" x1="${PAD}" y1="${y(s).toFixed(1)}" x2="${W - PAD}" y2="${y(s).toFixed(1)}"/><text class="g-lbl" x="${PAD + 3}" y="${(y(s) - 4).toFixed(1)}">${s}</text>`;
+    const marks = [];
+    for (let h = 24; h >= 0; h -= 6) {
+      const t = now - h * 3600_000;
+      const px = x(t).toFixed(1);
+      marks.push(
+        `<line class="g-grid" x1="${px}" y1="8" x2="${px}" y2="52"/>` +
+        `<text class="g-lbl" x="${px}" y="68" text-anchor="middle">${h === 0 ? "now" : fmtT(t)}</text>`
+      );
+    }
     box.innerHTML = `
       <svg viewBox="0 0 ${W} ${H}" class="g-svg">
-        ${grid(maxStock)}${grid(Math.round(maxStock / 2))}
-        <line class="g-zero" x1="${PAD}" y1="${y(0).toFixed(1)}" x2="${W - PAD}" y2="${y(0).toFixed(1)}"/>
-        <path class="g-line" d="${path}"/>
-        ${dots}
-      </svg>
-      <div class="g-x"><span>${new Date(t0).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span><span>now</span></div>`;
+        ${marks.join("")}
+        <line class="g-track" x1="${PAD}" y1="44" x2="${W - PAD}" y2="44"/>
+        ${ticks}
+      </svg>`;
   }
 
   let CROPS = null; // crop stat table

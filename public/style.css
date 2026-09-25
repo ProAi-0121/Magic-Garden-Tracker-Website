@@ -462,7 +462,7 @@ body.dark .cr-price { color: #7ee29a; }
 .modal-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .modal-hist { border-top: 2px dashed var(--chip-border); padding-top: 12px; }
 
-/* timeline */
+/* timeline (restocks only) */
 .timeline { display: flex; flex-direction: column; gap: 2px; margin: 10px 0; max-height: 220px; overflow-y: auto; }
 .tl-item {
   display: flex; align-items: center; gap: 10px;
@@ -470,24 +470,20 @@ body.dark .cr-price { color: #7ee29a; }
   animation: cardIn 0.25s ease both;
 }
 .tl-item:nth-child(2n) { background: var(--chip-bg); }
-.tl-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
-.tl-in .tl-dot { background: #43a047; box-shadow: 0 0 6px rgba(67, 160, 71, 0.6); }
-.tl-out .tl-dot { background: #e57373; box-shadow: 0 0 6px rgba(229, 115, 115, 0.5); }
+.tl-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; background: #43a047; box-shadow: 0 0 6px rgba(67, 160, 71, 0.6); }
 .tl-label { flex: 1; }
 .tl-time { color: var(--muted); font-size: 0.85em; font-weight: 800; }
 
-/* mini graph */
-.mini-graph { margin-top: 12px; background: var(--chip-bg); border: 2px solid var(--chip-border); border-radius: 12px; padding: 10px; }
+/* restock strip: one glowing tick per restock moment on a 24h line */
+.mini-graph { margin-top: 12px; background: var(--chip-bg); border: 2px solid var(--chip-border); border-radius: 12px; padding: 10px 6px 2px; }
 .g-svg { width: 100%; height: auto; display: block; }
 .g-grid { stroke: var(--chip-border); stroke-width: 1; stroke-dasharray: 3 4; }
-.g-zero { stroke: var(--muted); stroke-width: 1.4; }
 .g-lbl { fill: var(--muted); font: 700 10px "Nunito", sans-serif; }
-.g-line { fill: none; stroke: var(--green-500); stroke-width: 2.5; stroke-linejoin: round; }
-.g-dot { transition: r 0.12s ease; cursor: pointer; }
-.g-dot:hover { r: 6; }
-.gd-in { fill: #43a047; }
-.gd-out { fill: #e57373; }
-.g-x { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.8em; font-weight: 700; margin-top: 4px; }
+.g-track { stroke: var(--chip-border); stroke-width: 2.5; stroke-linecap: round; }
+.g-tick line { stroke: var(--green-500); stroke-width: 3; stroke-linecap: round; opacity: 0.45; transition: opacity 0.15s ease, stroke-width 0.15s ease; }
+.g-tick circle { fill: var(--green-500); cursor: pointer; transition: r 0.12s ease; }
+.g-tick:hover line { opacity: 1; stroke-width: 5; }
+.g-tick:hover circle { r: 6; }
 
 @media (max-width: 640px) {
   .modal { max-height: 92vh; }
