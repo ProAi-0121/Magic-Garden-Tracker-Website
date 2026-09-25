@@ -342,24 +342,11 @@ async function discordApi(endpoint, options = {}) {
   return res.json().catch(() => null);
 }
 
-// DM flood guard: max messages per user per minute (the poller batches, so a
-// legit user gets 1-3; this catches anyone gaming subscriptions).
-const DM_LIMIT = 8; // per user per 60s
-const dmSent = new Map(); // userId -> [timestamps]
-
 async function sendDm(userId, payload) {
   if (!config.bot_token) return false;
-  // flood check
-  const now = Date.now();
-  const recent = pruneWindow(dmSent.get(userId) || [], now, 60_000);
-  if (recent.length >= DM_LIMIT) {
-    console.log(`[bot] DM to ${userId} suppressed (rate limit)`);
-    dmSent.set(userId, recent);
-    return false;
-  }
-  recent.push(now);
-  dmSent.set(userId, recent);
-
+  // No artificial limit here - the bot decides when to send (batched,
+  // transition-only notifications), and Discord's own rate limits apply
+  // on the wire. Only the website's test-DM *button* has a cooldown.
   try {
     let dmChannelId = DM_CACHE.get(userId);
     if (!dmChannelId) {
