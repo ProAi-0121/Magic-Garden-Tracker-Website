@@ -44,6 +44,7 @@ const SUBS_PATH = path.join(__dirname, "subscriptions.json");
 const SESSIONS_PATH = path.join(__dirname, "sessions.json");
 const META_PATH = path.join(__dirname, "item_meta.json");
 const CATALOGS_PATH = path.join(__dirname, "shop_catalogs.json");
+const HISTORY_PATH = path.join(__dirname, "history.json");
 
 const API_BASE = "https://magicgarden.gg/platform/v1";
 const UA =
@@ -617,6 +618,79 @@ const priceOf = (meta, entry) => {
   return -1; // unknown price sinks to the bottom
 };
 
+// ---------------------------------------------------------------------------
+// Item history: every restock/sellout event, newest first, capped.
+// history.json: { itemId: { events: [{t, inStock, stock, shop, price}] } }
+// Powers the item popup graph. Kept in memory, flushed to disk.
+// ---------------------------------------------------------------------------
+const HISTORY_CAP = 200; // keep the last 200 events per item
+const HISTORY_TTL = 48 * 60 * 60_000; // and nothing older than 48h
+const history = await loadJson(HISTORY_PATH, {});
+let historyDirty = false;
+setInterval(() => {
+  if (historyDirty) {
+    historyDirty = false;
+    saveJson(HISTORY_PATH, history).catch(() => {});
+  }
+}, 15_000);
+
+function recordHistory(itemId, inStock, stock, shop, price, t = Date.now()) {
+  if (!history[itemId]) history[itemId] = { events: [] };
+  const ev = history[itemId].events;
+  const last = ev[0];
+  if (last && last.t === t && last.inStock === inStock) return; // dup guard
+  ev.unshift({ t, inStock, stock, shop, price });
+  const cutoff = Date.now() - HISTORY_TTL;
+  history[itemId].events = ev.filter((e) => e.t >= cutoff).slice(0, HISTORY_CAP);
+  historyDirty = true;
+}
+
+// a small durable queue for DMs that failed (Discord hiccup) - retried
+// on the next poll so a temporary outage never eats a notification
+const retryQueue = []; // { userId, payload, tries, at }
+function enqueueRetry(userId, payload) {
+  retryQueue.push({ userId, payload, tries: 0, at: Date.now() });
+  if (retryQueue.length > 200) retryQueue.shift(); // don't grow unbounded
+}
+
+// de-dupe: don't resend the exact same notification within an hour
+const recentSends = new Map(); // sig -> timestamp
+function recentlySent(sig) {
+  const now = Date.now();
+  const last = recentSends.get(sig);
+  if (last && now - last < 60 * 60_000) return true;
+  recentSends.set(sig, now);
+  if (recentSends.size > 500) {
+    for (const [k, v] of recentSends) {
+      if (now - v > 60 * 60_000) recentSends.delete(k);
+    }
+  }
+  return false;
+}
+
+async function processRetryQueue() {
+  let processed = 0;
+  while (retryQueue.length > 0 && processed < 5) {
+    const job = retryQueue[0];
+    if (Date.now() - job.at < 30_000) break; // wait 30s before first retry
+    const ok = await sendDm(job.userId, job.payload);
+    if (ok) {
+      retryQueue.shift();
+    } else {
+      job.tries++;
+      job.at = Date.now();
+      if (job.tries >= 5) {
+        console.log(`[notify] dropping notification after 5 tries`);
+        retryQueue.shift();
+      } else {
+        retryQueue.push(retryQueue.shift()); // move to back
+      }
+    }
+    processed++;
+  }
+}
+
+
 async function checkNotifications() {
   let data;
   try {
@@ -624,6 +698,30 @@ async function checkNotifications() {
   } catch (e) {
     console.log(`[poller] api error: ${e.message}`);
     return;
+  }
+
+  // --- history: record stock transitions for every item (popup data) ---
+  const prevKeys = new Set(lastStockKeys);
+  for (const [shopKey, shop] of Object.entries(data.shops)) {
+    const itemMap = new Map((shop.items || []).map((i) => [i.itemId, i]));
+    for (const cat of shop.catalog || []) {
+      const live = itemMap.get(cat.itemId);
+      const stock = live ? live.stock ?? 0 : 0;
+      const inStock = stock > 0;
+      const key = `${cat.itemId}|${shopKey}`;
+      if (prevKeys.has(key) !== inStock) {
+        recordHistory(cat.itemId, inStock, stock, shopKey, live ? live.coinPrice : cat.coinPrice);
+      }
+    }
+  }
+  // items in stock that some shop lists only in "items" (no catalog entry)
+  for (const [shopKey, shop] of Object.entries(data.shops)) {
+    for (const it of shop.items || []) {
+      const key = `${it.itemId}|${shopKey}`;
+      if (!prevKeys.has(key) && (it.stock ?? 0) > 0) {
+        recordHistory(it.itemId, true, it.stock, shopKey, it.coinPrice);
+      }
+    }
   }
 
   const userIds = Object.keys(subs).filter((uid) => {
@@ -656,15 +754,19 @@ async function checkNotifications() {
     if (weatherChanged && (s.weathers || []).length > 0) {
       const matched = s.weathers.find((w) => w === cur.name || w === cur.weatherId);
       if (matched) {
-        const wm = ITEM_META.weathers[cur.name] || {};
-        const embed = baseEmbed(`\`\`\`${cur.name} weather started!\`\`\``, 0x74b9ff, [
-          `**${cur.name}** is active right now.`,
-          ``,
-          `Ends ${relTime(cur.endsAt)}.`,
-        ]);
-        if (wm.image) embed.image = { url: wm.image };
-        // content carries the mention so the user actually gets pinged
-        sendDm(uid, { content: `<@${uid}>`, embeds: [embed] });
+        const sig = `w:${uid}:${cur.weatherId}|${cur.startsAt}`;
+        if (!recentlySent(sig)) {
+          const wm = ITEM_META.weathers[cur.name] || {};
+          const embed = baseEmbed(`\`\`\`${cur.name} weather started!\`\`\``, 0x74b9ff, [
+            `**${cur.name}** is active right now.`,
+            ``,
+            `Ends ${relTime(cur.endsAt)}.`,
+          ]);
+          if (wm.image) embed.image = { url: wm.image };
+          // content carries the mention so the user actually gets pinged
+          const ok = await sendDm(uid, { content: `<@${uid}>`, embeds: [embed] });
+          if (!ok) enqueueRetry(uid, { content: `<@${uid}>`, embeds: [embed] });
+        }
       }
     }
 
@@ -714,7 +816,11 @@ async function checkNotifications() {
       ? `<@${uid}>\n${summary}\n*(+${restocks.length - 10} more)*`
       : `<@${uid}>\n${summary}`;
 
-    sendDm(uid, { content, embeds });
+    // dedupe identical batches + queue a retry if Discord hiccups
+    const sig = `r:${uid}:${restocks.map((r) => `${r.itemId}@${r.entry.shop}`).join(",")}`;
+    if (recentlySent(sig)) continue;
+    const ok = await sendDm(uid, { content, embeds });
+    if (!ok) enqueueRetry(uid, { content, embeds });
   }
 
   // roll snapshots forward
@@ -1010,6 +1116,26 @@ const server = http.createServer(async (req, res) => {
     // ---------------- API: crop stats + mutations (calculator) ----------------
     if (p === "/api/crops") {
       return sendJson(res, 200, { crops: CROP_DATA.crops, mutations: MUTATION_DATA });
+    }
+
+    // ---------------- API: item stock history (popup graph) ----------------
+    if (p.startsWith("/api/history/")) {
+      const itemId = decodeURIComponent(p.slice("/api/history/".length));
+      const h = history[itemId] || { events: [] };
+      return sendJson(res, 200, {
+        itemId,
+        events: h.events || [],
+        // current state from the live cache, so the popup is always accurate
+        current: (() => {
+          const d = apiCache.data;
+          if (!d) return null;
+          for (const [shopKey, shop] of Object.entries(d.shops)) {
+            const it = (shop.items || []).find((i) => i.itemId === itemId);
+            if (it) return { shop: shopKey, stock: it.stock ?? 0, price: it.coinPrice };
+          }
+          return null;
+        })(),
+      });
     }
 
     // ---------------- API: bot status ----------------
