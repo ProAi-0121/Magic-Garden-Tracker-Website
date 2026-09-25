@@ -211,7 +211,7 @@
       // green/red border tells you what's buyable at a glance
       const stockCls = stocked ? "in-stock" : "out-of-stock";
       return `
-        <div class="item-card ${stockCls} ${stocked ? "" : "out"}">
+        <div class="item-card ${stockCls} ${stocked ? "" : "out"}" data-open="${escapeHtml(cat.itemId)}" title="Click for details & history">
           ${ME ? `<button class="bell ${subbed ? "on" : ""}" data-item="${escapeHtml(cat.itemId)}" title="${subbed ? "Remove alert" : "Alert me when in stock"}">🔔</button>` : ""}
           ${imgTag(cat)}
           <div class="item-name">${escapeHtml(cat.name)}</div>
@@ -222,7 +222,14 @@
     grid.innerHTML = rows.join("") || `<div class="muted">This shop has no catalog yet</div>`;
 
     grid.querySelectorAll(".bell").forEach((b) =>
-      b.addEventListener("click", () => toggleItemSub(b.dataset.item))
+      b.addEventListener("click", (e) => {
+        e.stopPropagation(); // don't open the popup when tapping the bell
+        toggleItemSub(b.dataset.item);
+      })
+    );
+    // click anywhere else on the card -> detail popup
+    grid.querySelectorAll("[data-open]").forEach((c) =>
+      c.addEventListener("click", () => openItemModal(c.dataset.open))
     );
 
     // saved-copy hint for closed weather shops
@@ -386,7 +393,162 @@
     }
   }
 
-  // ------------------------------------------------------------ calculator
+  // ------------------------------------------------------- item detail modal
+  function timeAgo(t) {
+    const s = Math.floor((Date.now() - t) / 1000);
+    if (s < 60) return `${s}s ago`;
+    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+    return `${Math.floor(s / 86400)}d ago`;
+  }
+
+  function closeModal() {
+    const el = $("item-modal");
+    if (el) {
+      el.classList.remove("open");
+      setTimeout(() => el.remove(), 180);
+      document.removeEventListener("keydown", modalEscClose);
+    }
+  }
+  function modalEscClose(e) {
+    if (e.key === "Escape") closeModal();
+  }
+
+  function openItemModal(itemId) {
+    closeModal();
+    const m = itemMeta(itemId) || {};
+    const overlay = document.createElement("div");
+    overlay.id = "item-modal";
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+      <div class="modal card">
+        <button class="modal-x" title="Close">✕</button>
+        <div class="modal-head">
+          ${m.image ? `<img class="modal-img" src="${m.image}" alt="" />` : `<div class="modal-img m-emoji" style="font-size:3em">📦</div>`}
+          <div>
+            <div class="modal-name">${escapeHtml(m.name || itemId)}</div>
+            <div class="modal-type muted">${escapeHtml(m.itemType || "")} · ${escapeHtml((SHOP_LABELS[m.shop] || {}).label || m.shop || "")}</div>
+          </div>
+        </div>
+        <div class="modal-now" id="modal-now">Checking current stock…</div>
+        <div class="modal-actions">
+          <button class="btn ${SUBS.items.includes(itemId) ? "btn-primary" : "btn-ghost"} modal-bell" id="modal-bell">
+            ${SUBS.items.includes(itemId) ? "🔔 Notifications ON" : "🔕 Notify me when in stock"}
+          </button>
+          <a class="btn btn-ghost" href="https://magicgarden.wiki/wiki/${encodeURIComponent((m.name || itemId).replace(/ /g, "_"))}" target="_blank" rel="noopener">Wiki ↗</a>
+        </div>
+        <div class="modal-hist">
+          <div class="strip-title">📈 Last 24 hours</div>
+          <div class="muted" id="modal-loading">Loading history…</div>
+          <div id="modal-timeline" class="timeline" hidden></div>
+          <div id="modal-graph" class="mini-graph"></div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector(".modal-x").addEventListener("click", closeModal);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModal();
+    });
+    document.addEventListener("keydown", modalEscClose);
+    requestAnimationFrame(() => overlay.classList.add("open"));
+
+    overlay.querySelector(".modal-bell").addEventListener("click", async (e) => {
+      await toggleItemSub(itemId);
+      const on = SUBS.items.includes(itemId);
+      const b = e.currentTarget;
+      b.textContent = on ? "🔔 Notifications ON" : "🔕 Notify me when in stock";
+      b.classList.toggle("btn-primary", on);
+      b.classList.toggle("btn-ghost", !on);
+    });
+
+    loadItemHistory(itemId);
+  }
+
+  async function loadItemHistory(itemId) {
+    let j;
+    try {
+      j = await fetch(`/api/history/${encodeURIComponent(itemId)}`).then((r) => r.json());
+    } catch {
+      const el = $("modal-loading");
+      if (el) el.textContent = "Couldn't load history";
+      return;
+    }
+    const now = $("modal-now");
+    if (now && j.current) {
+      const inStock = (j.current.stock ?? 0) > 0;
+      now.innerHTML = inStock
+        ? `<span class="badge in">IN STOCK NOW</span> <b>${j.current.stock}×</b> · ${escapeHtml((SHOP_LABELS[j.current.shop] || {}).label || j.current.shop)} · ${fmtPrice(j.current.price)} coins`
+        : `<span class="badge out">not in stock right now</span>`;
+    } else if (now) {
+      now.innerHTML = `<span class="badge out">not in stock right now</span>`;
+    }
+
+    const tl = $("modal-timeline");
+    const loading = $("modal-loading");
+    if (!tl || !loading) return;
+    const evs = (j.events || []).slice(0, 50);
+    if (!evs.length) {
+      loading.textContent = "No restocks recorded yet — we're still watching this item.";
+      return;
+    }
+    loading.hidden = true;
+    tl.hidden = false;
+    tl.innerHTML = evs
+      .map((e) => {
+        const cls = e.inStock ? "tl-in" : "tl-out";
+        const label = e.inStock ? `in stock${e.stock ? ` ×${e.stock}` : ""}` : "sold out";
+        return `<div class="tl-item ${cls}">
+          <span class="tl-dot"></span>
+          <span class="tl-label">${label}</span>
+          <span class="tl-time">${timeAgo(e.t)}</span>
+        </div>`;
+      })
+      .join("");
+
+    renderMiniGraph($("modal-graph"), evs);
+  }
+
+  // interactive svg sparkline of stock over the last 24h
+  function renderMiniGraph(box, evs) {
+    if (!box) return;
+    const cut = Date.now() - 24 * 3600_000;
+    const pts = evs.filter((e) => e.t >= cut).reverse();
+    if (pts.length < 2) {
+      box.innerHTML = `<div class="muted" style="margin-top:8px">Not enough data for a graph yet — check back after the next restock.</div>`;
+      return;
+    }
+    const W = 560, H = 130, PAD = 10;
+    const t0 = pts[0].t;
+    const t1 = Math.max(pts[pts.length - 1].t, Date.now());
+    const maxStock = Math.max(4, ...pts.map((p) => p.stock || 0));
+    const x = (t) => PAD + ((t - t0) / Math.max(1, t1 - t0)) * (W - 2 * PAD);
+    const y = (s) => H - PAD - ((s || 0) / maxStock) * (H - 2 * PAD);
+    // step path: hold each state until the next event
+    let path = "";
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i];
+      const v = p.inStock ? p.stock : 0;
+      const nx = pts[i + 1] ? pts[i + 1].t : t1;
+      path += `M ${x(p.t).toFixed(1)} ${y(v).toFixed(1)} L ${x(nx).toFixed(1)} ${y(v).toFixed(1)} `;
+    }
+    const dots = pts
+      .map(
+        (p) =>
+          `<circle class="g-dot ${p.inStock ? "gd-in" : "gd-out"}" cx="${x(p.t).toFixed(1)}" cy="${y(p.inStock ? p.stock : 0).toFixed(1)}" r="4"><title>${escapeHtml(new Date(p.t).toLocaleString())} — ${p.inStock ? `in stock ×${p.stock}` : "sold out"}</title></circle>`
+      )
+      .join("");
+    const grid = (s, cls) =>
+      `<line class="g-grid ${cls || ""}" x1="${PAD}" y1="${y(s).toFixed(1)}" x2="${W - PAD}" y2="${y(s).toFixed(1)}"/><text class="g-lbl" x="${PAD + 3}" y="${(y(s) - 4).toFixed(1)}">${s}</text>`;
+    box.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" class="g-svg">
+        ${grid(maxStock)}${grid(Math.round(maxStock / 2))}
+        <line class="g-zero" x1="${PAD}" y1="${y(0).toFixed(1)}" x2="${W - PAD}" y2="${y(0).toFixed(1)}"/>
+        <path class="g-line" d="${path}"/>
+        ${dots}
+      </svg>
+      <div class="g-x"><span>${new Date(t0).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span><span>now</span></div>`;
+  }
+
   let CROPS = null; // crop stat table
   let MUTS = null; // { elemental, visual }
   const calcState = { crop: "Carrot", mutations: new Set() };
