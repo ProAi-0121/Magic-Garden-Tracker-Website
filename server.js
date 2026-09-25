@@ -8,7 +8,7 @@
  *   - Background poller detects weather starts + item restocks and DMs users
  *     through the configured bot token.
  *
- * Run:  node server.js      (then open http://192.168.1.69:8000)
+ * Run:  node server.js      (then open http://192.168.1.69:8888)
  */
 
 import http from "node:http";
@@ -58,9 +58,9 @@ const CACHE_MS = 5_000; // serve cached API data if younger than this
 const DEFAULT_CONFIG = {
   client_id: "",
   client_secret: "",
-  redirect_uri: "http://192.168.1.69:8000/callback",
+  redirect_uri: "http://192.168.1.69:8888/callback",
   bot_token: "",
-  port: 8000,
+  port: 8888,
 };
 
 let config = { ...DEFAULT_CONFIG };
@@ -802,6 +802,8 @@ function sendJson(res, status, obj) {
 }
 
 function sendFile(res, filePath) {
+  // html gets a page-friendly CSP (fonts + image cdn), everything else stays strict
+  securityHeaders(res, filePath.toLowerCase().endsWith(".html") ? filePath : null);
   fsp
     .readFile(filePath)
     .then((data) => {
@@ -902,14 +904,29 @@ function readBody(req) {
 }
 
 // ------------------------------------------------------- security headers
-function securityHeaders(res) {
+function securityHeaders(res, filePath) {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  // our api only ever serves json from these routes; keep browsers from
-  // sniffing anything else into executing
-  res.setHeader("Content-Security-Policy", "default-src 'none'");
+  if (filePath) {
+    // HTML pages: allow exactly what the site needs - our own assets,
+    // Google Fonts, and the wiki image CDN. Everything else is blocked.
+    res.setHeader(
+      "Content-Security-Policy",
+      [
+        "default-src 'self'",
+        "font-src https://fonts.gstatic.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "script-src 'self'",
+        "img-src 'self' https://media.magicgarden.wiki https://cdn.discordapp.com data:",
+        "connect-src 'self'",
+      ].join("; ")
+    );
+  } else {
+    // API responses (json) - lock down completely, nothing should load these
+    res.setHeader("Content-Security-Policy", "default-src 'none'");
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1147,7 +1164,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-const PORT = Number(config.port) || 8000;
+const PORT = Number(config.port) || 8888;
 // kill slow/rogue connections so a flood can't tie up sockets
 server.headersTimeout = 10_000; // time to receive headers
 server.requestTimeout = 30_000; // time to receive the whole request
